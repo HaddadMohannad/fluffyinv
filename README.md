@@ -1,19 +1,16 @@
 # Fluffy Inventory & Sales System
 
-Next.js 15 (App Router, TypeScript, Tailwind CSS) app for Fluffy Group's inventory and sales system, backed by Supabase.
+React + Vite single-page app for Fluffy Group's inventory and sales system, backed by Supabase. Deployed as a static site on **GitHub Pages** — the app talks to Supabase directly from the browser using the public anon key; there is no server component, by design.
 
-## Run in GitHub Codespaces (primary access method)
+## Live URL
 
-This is the intended way to run and access the app — entirely on GitHub's infrastructure, no local machine or third-party host involved.
+`https://<github-username>.github.io/fluffyinv/` — deploys automatically from `main` via `.github/workflows/deploy-pages.yml`.
 
-1. On the repo's GitHub page: **Code** → **Codespaces** → **Create codespace on main**
-2. Once it opens (dependencies install automatically), copy `.env.example` to `.env.local` and fill in the Supabase values
-3. Run `npm run dev` in the terminal
-4. Codespaces will prompt to open a forwarded preview of port 3000 — that's your URL (`https://<something>-3000.app.github.dev`)
+**One-time setup required** (repo owner, in GitHub UI — not something that can be scripted): go to **Settings → Pages → Build and deployment → Source**, select **GitHub Actions**. After that, every push to `main` deploys automatically.
 
-**Port visibility is set to `public`** (see `.devcontainer/devcontainer.json`), so that URL works for anyone with the link, no GitHub login required. There's nothing sensitive behind it yet — no auth, no write actions — but this should be revisited once FLU-7 (auth) and real data-entry screens ship, since "public" means unauthenticated.
+## Architecture note: why no server
 
-A Codespace is not permanent: it sleeps after inactivity and the URL changes each time you create a new one. For an always-on stable URL, see the Vercel option noted in Linear (deferred, not the current direction).
+This app is 100% static HTML/JS/CSS. It calls Supabase's REST/Auth API directly from the browser using the **anon key only** — the same key that's safe to ship in a public bundle, because Supabase's Row Level Security policies (not key secrecy) are the actual access-control boundary. The `SUPABASE_SERVICE_ROLE_KEY` must **never** appear anywhere in this codebase: a static site ships all its JS to every visitor, so any secret placed here is not a secret. Anything that needs elevated/service-role privileges in the future (e.g. bulk imports) needs a separate mechanism — Supabase Edge Functions, not a key embedded here.
 
 ## Local setup
 
@@ -21,21 +18,26 @@ A Codespace is not permanent: it sleeps after inactivity and the URL changes eac
    ```
    npm install
    ```
-2. Copy `.env.example` to `.env.local` and fill in the Supabase project values:
-   ```
-   cp .env.example .env.local
-   ```
+2. `.env` already contains the public Supabase URL and anon key (safe to commit — see architecture note above). Only create `.env.local` if you want to override those locally.
 3. Run the dev server:
    ```
    npm run dev
    ```
-   App runs at http://localhost:3000.
+   App runs at http://localhost:5173/fluffyinv/.
+
+## Run in GitHub Codespaces
+
+Still useful for development (editing/testing before pushing), independent of how the app is hosted:
+
+1. On the repo's GitHub page: **Code** → **Codespaces** → **Create codespace on main**
+2. Once it opens, run `npm run dev`
+3. Open the forwarded preview of port 5173
 
 ## Scripts
 
-- `npm run dev` — start the dev server
-- `npm run build` — production build
-- `npm run start` — run the production build
+- `npm run dev` — start the Vite dev server
+- `npm run build` — typecheck + production build to `dist/`
+- `npm run preview` — preview the production build locally
 - `npm run lint` — ESLint
 - `npm run format` — Prettier write
 - `npm run format:check` — Prettier check

@@ -1,21 +1,17 @@
 import type { ReactNode } from "react";
-import { signOut } from "@/app/actions/auth";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { useLocale } from "@/lib/i18n/LocaleContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { dictionary } from "@/lib/i18n/dictionary";
-import type { Locale } from "@/lib/i18n/dictionary";
 
 type NavItem = { href: string; labelKey: keyof (typeof dictionary)["en"] };
 
 const NAV_ITEMS: NavItem[] = [{ href: "/", labelKey: "home" }];
 
-export function AppShell({
-  children,
-  locale,
-}: {
-  children: ReactNode;
-  locale: Locale;
-}) {
-  const t = dictionary[locale];
+export function AppShell({ children }: { children: ReactNode }) {
+  const { t } = useLocale();
+  const { signOut } = useAuth();
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
@@ -24,15 +20,14 @@ export function AppShell({
           {t.appName}
         </span>
         <div className="flex items-center gap-2">
-          <LanguageToggle locale={locale} label={t.switchToLabel} />
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="h-11 rounded-md border border-zinc-300 px-3 text-sm font-medium dark:border-zinc-700"
-            >
-              {t.signOut}
-            </button>
-          </form>
+          <LanguageToggle />
+          <button
+            type="button"
+            onClick={() => signOut()}
+            className="h-11 rounded-md border border-zinc-300 px-3 text-sm font-medium dark:border-zinc-700"
+          >
+            {t.signOut}
+          </button>
         </div>
       </header>
 
@@ -41,12 +36,12 @@ export function AppShell({
           <ul className="flex flex-col gap-1">
             {NAV_ITEMS.map((item) => (
               <li key={item.href}>
-                <a
-                  href={item.href}
+                <Link
+                  to={item.href}
                   className="flex h-11 items-center rounded-md px-3 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-900"
                 >
                   {t[item.labelKey]}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -57,13 +52,13 @@ export function AppShell({
 
       <nav className="fixed inset-x-0 bottom-0 flex h-16 border-t border-zinc-200 bg-white md:hidden dark:border-zinc-800 dark:bg-black">
         {NAV_ITEMS.map((item) => (
-          <a
+          <Link
             key={item.href}
-            href={item.href}
+            to={item.href}
             className="flex flex-1 flex-col items-center justify-center gap-1 text-sm font-medium"
           >
             {t[item.labelKey]}
-          </a>
+          </Link>
         ))}
       </nav>
     </div>
