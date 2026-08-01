@@ -28,6 +28,8 @@ export const dictionary = {
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 
+export type Strings = { [K in keyof (typeof dictionary)["en"]]: string };
+
 export function dir(locale: Locale): "rtl" | "ltr" {
   return locale === "ar" ? "rtl" : "ltr";
 }

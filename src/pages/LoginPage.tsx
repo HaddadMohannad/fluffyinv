@@ -1,24 +1,40 @@
-"use client";
-
-import { useActionState } from "react";
-import { signIn, type SignInState } from "@/app/actions/auth";
+import { useState, type FormEvent } from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/lib/auth/AuthContext";
+import { useLocale } from "@/lib/i18n/LocaleContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
-import type { Locale } from "@/lib/i18n/dictionary";
-import { dictionary } from "@/lib/i18n/dictionary";
 
-const initialState: SignInState = { error: null };
+export function LoginPage() {
+  const { session, loading, signIn } = useAuth();
+  const { t } = useLocale();
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
 
-export function LoginForm({ locale }: { locale: Locale }) {
-  const [state, formAction, pending] = useActionState(signIn, initialState);
-  const t = dictionary[locale];
+  if (!loading && session) {
+    return <Navigate to="/" replace />;
+  }
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setPending(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    const { error: signInError } = await signIn(email, password);
+    setPending(false);
+    if (signInError) setError(signInError);
+  }
 
   return (
     <div className="flex flex-1 flex-col">
       <div className="flex justify-end p-4">
-        <LanguageToggle locale={locale} label={t.switchToLabel} />
+        <LanguageToggle />
       </div>
       <div className="flex flex-1 flex-col items-center justify-center px-6">
-        <form action={formAction} className="w-full max-w-sm space-y-4">
+        <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
           <h1 className="text-fluffy-dark text-2xl font-semibold dark:text-zinc-50">
             {t.signIn}
           </h1>
@@ -48,7 +64,7 @@ export function LoginForm({ locale }: { locale: Locale }) {
               className="h-11 w-full rounded-md border border-zinc-300 px-3 text-base dark:border-zinc-700 dark:bg-zinc-900"
             />
           </div>
-          {state.error && <p className="text-sm text-red-600">{state.error}</p>}
+          {error && <p className="text-sm text-red-600">{error}</p>}
           <button
             type="submit"
             disabled={pending}

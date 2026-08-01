@@ -2,10 +2,9 @@
   "name": "Fluffy Inventory",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
   "postCreateCommand": "npm install",
-  "postStartCommand": "cp -n .env.example .env.local || true",
-  "forwardPorts": [3000],
+  "forwardPorts": [5173],
   "portsAttributes": {
-    "3000": {
+    "5173": {
       "label": "Fluffy Inventory (dev)",
       "onAutoForward": "openPreview",
       "visibility": "public"

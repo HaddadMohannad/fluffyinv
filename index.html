@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/fluffyinv/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fluffy Inventory</title>
+    <script>
+      (function () {
+        var locale = localStorage.getItem("fluffy_locale") || "en";
+        document.documentElement.lang = locale;
+        document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
+      })();
+    </script>
+  </head>
+  <body class="h-full antialiased">
+    <div id="root" class="flex min-h-screen flex-col"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

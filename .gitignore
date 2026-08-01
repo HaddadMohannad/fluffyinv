@@ -13,12 +13,8 @@
 # testing
 /coverage
 
-# next.js
-/.next/
-/out/
-
-# production
-/build
+# build output
+/dist
 
 # misc
 .DS_Store
@@ -30,13 +26,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-!.env.example
-
-# vercel
-.vercel
+# env files — .env holds only the public Supabase URL/anon key (safe to
+# commit, protected by RLS not secrecy) so builds work with zero setup.
+# .env.local stays ignored for any personal local overrides.
+.env.local
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
