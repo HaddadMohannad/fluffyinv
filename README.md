@@ -2,6 +2,13 @@
 
 Next.js 15 (App Router, TypeScript, Tailwind CSS) app for Fluffy Group's inventory and sales system, backed by Supabase.
 
+## Run in GitHub Codespaces
+
+1. On the repo's GitHub page: **Code** → **Codespaces** → **Create codespace on main**
+2. Once it opens (dependencies install automatically), copy `.env.example` to `.env.local` and fill in the Supabase values
+3. Run `npm run dev` in the terminal
+4. Codespaces will prompt to open a forwarded preview of port 3000 — that's your URL
+
 ## Local setup
 
 1. Install dependencies:
