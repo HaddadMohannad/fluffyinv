@@ -7,6 +7,7 @@ import {
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
+import { setRememberMe } from "@/lib/supabase/rememberableStorage";
 import type { Tables } from "@/lib/supabase/database.types";
 
 type AuthState = {
@@ -16,9 +17,12 @@ type AuthState = {
   loading: boolean;
   signIn: (
     email: string,
-    password: string
+    password: string,
+    remember: boolean
   ) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<{ error: string | null }>;
+  updatePassword: (newPassword: string) => Promise<{ error: string | null }>;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -97,8 +101,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [session?.user, sessionLoading]);
 
-  async function signIn(email: string, password: string) {
+  async function signIn(email: string, password: string, remember: boolean) {
     try {
+      setRememberMe(remember);
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -132,6 +138,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   }
 
+  async function requestPasswordReset(email: string) {
+    const redirectTo = `${window.location.origin}${import.meta.env.BASE_URL}reset-password`;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo,
+    });
+
+    if (error) {
+      console.error("requestPasswordReset error:", error);
+      return { error: error.message || "Could not send reset link." };
+    }
+    return { error: null };
+  }
+
+  async function updatePassword(newPassword: string) {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (error) {
+      console.error("updatePassword error:", error);
+      return { error: error.message || "Could not update password." };
+    }
+    return { error: null };
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -141,6 +172,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading: sessionLoading || profileLoading,
         signIn,
         signOut,
+        requestPasswordReset,
+        updatePassword,
       }}
     >
       {children}
