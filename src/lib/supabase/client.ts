@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
+import { rememberableStorage } from "./rememberableStorage";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -16,4 +17,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
  * it would be bundled and exposed to every visitor. RLS policies are the
  * real access-control boundary.
  */
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: rememberableStorage,
+  },
+});
