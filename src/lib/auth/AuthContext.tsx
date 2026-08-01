@@ -98,11 +98,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session?.user, sessionLoading]);
 
   async function signIn(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error: error?.message ?? null };
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (!error) return { error: null };
+
+      console.error("signIn error:", {
+        name: error.name,
+        status: error.status,
+        code: error.code,
+        message: error.message,
+      });
+
+      const message =
+        typeof error.message === "string" && error.message.trim().length > 0
+          ? error.message
+          : `Sign-in failed (${error.name ?? "unknown"}${error.status ? `, HTTP ${error.status}` : ""}). Check the browser console for details.`;
+
+      return { error: message };
+    } catch (err) {
+      console.error("signIn threw:", err);
+      return {
+        error:
+          "Could not reach the sign-in service. Check your connection and try again.",
+      };
+    }
   }
 
   async function signOut() {
