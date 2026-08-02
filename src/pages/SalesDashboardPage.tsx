@@ -17,7 +17,13 @@ type SalesRow = Pick<
 
 type SalesSource = Enums<"sales_source">;
 
-const SOURCES: SalesSource[] = ["talabat", "careem", "foodics", "manual", "pos"];
+const SOURCES: SalesSource[] = [
+  "talabat",
+  "careem",
+  "foodics",
+  "manual",
+  "pos",
+];
 
 export function SalesDashboardPage() {
   const { t } = useLocale();
