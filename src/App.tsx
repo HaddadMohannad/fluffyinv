@@ -6,6 +6,7 @@ import { ResetPasswordPage } from "@/pages/ResetPasswordPage";
 import { HomePage } from "@/pages/HomePage";
 import { ImportPage } from "@/pages/ImportPage";
 import { SalesDashboardPage } from "@/pages/SalesDashboardPage";
+import { OpeningStockPage } from "@/pages/OpeningStockPage";
 
 export function App() {
   return (
@@ -34,6 +35,14 @@ export function App() {
           element={
             <AppShell>
               <ImportPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/opening-stock"
+          element={
+            <AppShell>
+              <OpeningStockPage />
             </AppShell>
           }
         />
