@@ -7,6 +7,7 @@ import { HomePage } from "@/pages/HomePage";
 import { ImportPage } from "@/pages/ImportPage";
 import { SalesDashboardPage } from "@/pages/SalesDashboardPage";
 import { OpeningStockPage } from "@/pages/OpeningStockPage";
+import { PurchasePage } from "@/pages/PurchasePage";
 
 export function App() {
   return (
@@ -43,6 +44,14 @@ export function App() {
           element={
             <AppShell>
               <OpeningStockPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/purchase"
+          element={
+            <AppShell>
+              <PurchasePage />
             </AppShell>
           }
         />
