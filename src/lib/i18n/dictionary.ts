@@ -79,6 +79,10 @@ export const dictionary = {
     notPermitted: "You don't have permission to use this screen.",
     selectProductFirst: "Select a product first.",
     invalidQuantityOrCost: "Enter a valid quantity and unit cost.",
+    purchase: "Purchase",
+    purchaseTitle: "Purchase / Goods Received",
+    newAverageCost: "New avg. cost",
+    updatedQty: "Updated qty",
   },
   ar: {
     appName: "فلافي - المخزون",
@@ -157,6 +161,10 @@ export const dictionary = {
     notPermitted: "ليس لديك صلاحية لاستخدام هذه الشاشة.",
     selectProductFirst: "اختر منتجًا أولاً.",
     invalidQuantityOrCost: "أدخل كمية وتكلفة وحدة صحيحتين.",
+    purchase: "مشتريات",
+    purchaseTitle: "مشتريات / استلام بضاعة",
+    newAverageCost: "متوسط التكلفة الجديد",
+    updatedQty: "الكمية المحدثة",
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 
