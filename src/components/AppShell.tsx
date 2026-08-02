@@ -5,13 +5,25 @@ import { useLocale } from "@/lib/i18n/LocaleContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { dictionary } from "@/lib/i18n/dictionary";
 
-type NavItem = { href: string; labelKey: keyof (typeof dictionary)["en"] };
+type NavItem = {
+  href: string;
+  labelKey: keyof (typeof dictionary)["en"];
+  roles?: Array<"admin" | "branch_manager" | "warehouse_staff" | "accountant">;
+};
 
-const NAV_ITEMS: NavItem[] = [{ href: "/", labelKey: "home" }];
+const NAV_ITEMS: NavItem[] = [
+  { href: "/", labelKey: "home" },
+  { href: "/import", labelKey: "import", roles: ["admin", "accountant"] },
+];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useLocale();
-  const { signOut } = useAuth();
+  const { signOut, profile } = useAuth();
+
+  const visibleItems = NAV_ITEMS.filter(
+    (item) =>
+      !item.roles || (profile?.role && item.roles.includes(profile.role))
+  );
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
@@ -34,7 +46,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex flex-1">
         <nav className="hidden w-48 shrink-0 border-e border-zinc-200 p-4 md:block dark:border-zinc-800">
           <ul className="flex flex-col gap-1">
-            {NAV_ITEMS.map((item) => (
+            {visibleItems.map((item) => (
               <li key={item.href}>
                 <Link
                   to={item.href}
@@ -51,7 +63,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <nav className="fixed inset-x-0 bottom-0 flex h-16 border-t border-zinc-200 bg-white md:hidden dark:border-zinc-800 dark:bg-black">
-        {NAV_ITEMS.map((item) => (
+        {visibleItems.map((item) => (
           <Link
             key={item.href}
             to={item.href}

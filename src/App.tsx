@@ -4,6 +4,7 @@ import { AppShell } from "@/components/AppShell";
 import { LoginPage } from "@/pages/LoginPage";
 import { ResetPasswordPage } from "@/pages/ResetPasswordPage";
 import { HomePage } from "@/pages/HomePage";
+import { ImportPage } from "@/pages/ImportPage";
 
 export function App() {
   return (
@@ -16,6 +17,14 @@ export function App() {
           element={
             <AppShell>
               <HomePage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/import"
+          element={
+            <AppShell>
+              <ImportPage />
             </AppShell>
           }
         />
