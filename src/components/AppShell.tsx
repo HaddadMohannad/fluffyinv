@@ -13,6 +13,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/", labelKey: "home" },
+  { href: "/sales", labelKey: "sales" },
   { href: "/import", labelKey: "import", roles: ["admin", "accountant"] },
 ];
 
