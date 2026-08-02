@@ -12,6 +12,28 @@
         document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
       })();
     </script>
+    <script type="text/javascript">
+      // Single Page Apps for GitHub Pages
+      // https://github.com/rafgraph/spa-github-pages
+      // Reverses the redirect from 404.html, restoring the real deep-link
+      // path (e.g. /fluffyinv/sales) before React Router mounts.
+      (function (l) {
+        if (l.search[1] === "/") {
+          var decoded = l.search
+            .slice(1)
+            .split("&")
+            .map(function (s) {
+              return s.replace(/~and~/g, "&");
+            })
+            .join("?");
+          window.history.replaceState(
+            null,
+            null,
+            l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      })(window.location);
+    </script>
   </head>
   <body class="h-full antialiased">
     <div id="root" class="flex min-h-screen flex-col"></div>
