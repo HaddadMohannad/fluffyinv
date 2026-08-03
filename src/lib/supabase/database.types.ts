@@ -317,10 +317,13 @@ export type Database = {
         Row: {
           active: boolean;
           city: string | null;
+          close_time: string | null;
           created_at: string;
+          day_close_cutoff_time: string | null;
           id: string;
           name_ar: string;
           name_en: string;
+          open_time: string | null;
           ownership: Database["public"]["Enums"]["ownership_type"];
           status: string;
           type: Database["public"]["Enums"]["location_type"];
@@ -328,10 +331,13 @@ export type Database = {
         Insert: {
           active?: boolean;
           city?: string | null;
+          close_time?: string | null;
           created_at?: string;
+          day_close_cutoff_time?: string | null;
           id?: string;
           name_ar: string;
           name_en: string;
+          open_time?: string | null;
           ownership?: Database["public"]["Enums"]["ownership_type"];
           status?: string;
           type: Database["public"]["Enums"]["location_type"];
@@ -339,10 +345,13 @@ export type Database = {
         Update: {
           active?: boolean;
           city?: string | null;
+          close_time?: string | null;
           created_at?: string;
+          day_close_cutoff_time?: string | null;
           id?: string;
           name_ar?: string;
           name_en?: string;
+          open_time?: string | null;
           ownership?: Database["public"]["Enums"]["ownership_type"];
           status?: string;
           type?: Database["public"]["Enums"]["location_type"];
@@ -1180,6 +1189,10 @@ export type Database = {
     Functions: {
       approve_stocktake: { Args: { p_stocktake_id: string }; Returns: undefined };
       cancel_transfer: { Args: { p_transfer_id: string }; Returns: undefined };
+      close_day: {
+        Args: { p_close_date: string; p_location_id: string };
+        Returns: undefined;
+      };
       complete_transfer: {
         Args: { p_transfer_id: string };
         Returns: {
@@ -1195,6 +1208,19 @@ export type Database = {
           p_to_location_id: string;
         };
         Returns: string;
+      };
+      get_daily_closing_report: {
+        Args: { p_close_date: string; p_location_id: string };
+        Returns: {
+          current_qty: number;
+          expected_closing_qty: number;
+          hospitality_qty: number;
+          opening_qty: number;
+          product_id: string;
+          received_qty: number;
+          sold_qty: number;
+          waste_qty: number;
+        }[];
       };
       my_location: { Args: never; Returns: string };
       my_role: {
@@ -1277,6 +1303,10 @@ export type Database = {
           record_id: string;
           value_lost: number;
         }[];
+      };
+      reopen_day: {
+        Args: { p_close_date: string; p_location_id: string; p_reason: string };
+        Returns: undefined;
       };
       save_stocktake_counts: {
         Args: { p_lines: Json; p_stocktake_id: string };

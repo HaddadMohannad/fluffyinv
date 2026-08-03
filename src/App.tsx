@@ -15,6 +15,7 @@ import { WastePage } from "@/pages/WastePage";
 import { LookupListsPage } from "@/pages/LookupListsPage";
 import { InventoryPage } from "@/pages/InventoryPage";
 import { ProductionPage } from "@/pages/ProductionPage";
+import { DailyClosingPage } from "@/pages/DailyClosingPage";
 
 export function App() {
   return (
@@ -115,6 +116,14 @@ export function App() {
           element={
             <AppShell>
               <ProductionPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/daily-closing"
+          element={
+            <AppShell>
+              <DailyClosingPage />
             </AppShell>
           }
         />
