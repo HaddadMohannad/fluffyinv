@@ -68,17 +68,17 @@ export type Database = {
       };
       hospitality_limits: {
         Row: {
-          limit_kg: number;
+          limit_value: number;
           location_id: string;
           month: string;
         };
         Insert: {
-          limit_kg: number;
+          limit_value: number;
           location_id: string;
           month: string;
         };
         Update: {
-          limit_kg?: number;
+          limit_value?: number;
           location_id?: string;
           month?: string;
         };
@@ -1151,6 +1151,24 @@ export type Database = {
           ledger_id: number;
           new_avg_cost: number;
           new_qty: number;
+        }[];
+      };
+      record_hospitality: {
+        Args: {
+          p_confirm_over_limit?: boolean;
+          p_h_type: Database["public"]["Enums"]["hospitality_type"];
+          p_location_id: string;
+          p_note?: string;
+          p_product_id: string;
+          p_qty: number;
+        };
+        Returns: {
+          ledger_id: number;
+          limit_value: number;
+          month_usage: number;
+          record_id: string;
+          usage_pct: number;
+          value: number;
         }[];
       };
       record_opening_stock: {
