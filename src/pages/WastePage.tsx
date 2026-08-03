@@ -4,12 +4,9 @@ import { useLocale } from "@/lib/i18n/LocaleContext";
 import { supabase } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
 
-const REASONS = ["expired", "damaged", "prep_error", "other"] as const;
-type Reason = (typeof REASONS)[number];
-
 export function WastePage() {
   const { profile } = useAuth();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
 
   const canWrite =
     profile?.role === "admin" || profile?.role === "branch_manager";
@@ -21,7 +18,8 @@ export function WastePage() {
   const [productQuery, setProductQuery] = useState("");
   const [productId, setProductId] = useState("");
   const [qty, setQty] = useState("");
-  const [reason, setReason] = useState<Reason>("expired");
+  const [reasons, setReasons] = useState<Tables<"lookup_values">[]>([]);
+  const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -33,12 +31,12 @@ export function WastePage() {
     ? (profile?.location_id ?? "")
     : selectedLocationId;
 
-  const reasonLabels: Record<Reason, string> = {
-    expired: t.reasonExpired,
-    damaged: t.reasonDamaged,
-    prep_error: t.reasonPrepError,
-    other: t.reasonOther,
-  };
+  const reasonLabel = useMemo(() => {
+    const map = new Map(
+      reasons.map((r) => [r.code, locale === "ar" ? r.name_ar : r.name_en])
+    );
+    return (code: string) => map.get(code) ?? code;
+  }, [reasons, locale]);
 
   useEffect(() => {
     if (!canWrite) return;
@@ -53,6 +51,17 @@ export function WastePage() {
       .eq("active", true)
       .order("name_en")
       .then(({ data }) => setProducts(data ?? []));
+    supabase
+      .from("lookup_values")
+      .select("*")
+      .eq("list_key", "waste_reason")
+      .eq("active", true)
+      .order("sort_order")
+      .then(({ data }) => {
+        const rows = data ?? [];
+        setReasons(rows);
+        setReason((current) => current || (rows.length > 0 ? rows[0].code : ""));
+      });
   }, [canWrite]);
 
   useEffect(() => {
@@ -135,7 +144,7 @@ export function WastePage() {
     setProductId("");
     setProductQuery("");
     setQty("");
-    setReason("expired");
+    setReason(reasons.length > 0 ? reasons[0].code : "");
     setRefreshKey((k) => k + 1);
   }
 
@@ -214,12 +223,12 @@ export function WastePage() {
           {t.wasteReasonLabel}
           <select
             value={reason}
-            onChange={(e) => setReason(e.target.value as Reason)}
+            onChange={(e) => setReason(e.target.value)}
             className="h-11 rounded-md border border-zinc-300 px-3 dark:border-zinc-700 dark:bg-zinc-900"
           >
-            {REASONS.map((r) => (
-              <option key={r} value={r}>
-                {reasonLabels[r]}
+            {reasons.map((r) => (
+              <option key={r.code} value={r.code}>
+                {reasonLabel(r.code)}
               </option>
             ))}
           </select>
@@ -230,7 +239,7 @@ export function WastePage() {
 
         <button
           type="submit"
-          disabled={saving || !locationId || !productId}
+          disabled={saving || !locationId || !productId || !reason}
           className="bg-fluffy-orange h-11 rounded-md text-base font-medium text-white disabled:opacity-60"
         >
           {saving ? t.submitting : t.submitEntry}
@@ -258,11 +267,7 @@ export function WastePage() {
                   >
                     <td className="p-2">{productName(entry.product_id)}</td>
                     <td className="p-2 text-end">{entry.qty}</td>
-                    <td className="p-2">
-                      {entry.reason && entry.reason in reasonLabels
-                        ? reasonLabels[entry.reason as Reason]
-                        : entry.reason}
-                    </td>
+                    <td className="p-2">{reasonLabel(entry.reason ?? "")}</td>
                     <td className="p-2 text-end">{entry.value_lost}</td>
                   </tr>
                 ))}

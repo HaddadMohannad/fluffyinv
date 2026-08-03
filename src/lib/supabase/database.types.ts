@@ -96,7 +96,7 @@ export type Database = {
         Row: {
           created_at: string;
           created_by: string | null;
-          h_type: Database["public"]["Enums"]["hospitality_type"];
+          h_type: string;
           id: string;
           location_id: string;
           notes: string | null;
@@ -107,7 +107,7 @@ export type Database = {
         Insert: {
           created_at?: string;
           created_by?: string | null;
-          h_type: Database["public"]["Enums"]["hospitality_type"];
+          h_type: string;
           id?: string;
           location_id: string;
           notes?: string | null;
@@ -118,7 +118,7 @@ export type Database = {
         Update: {
           created_at?: string;
           created_by?: string | null;
-          h_type?: Database["public"]["Enums"]["hospitality_type"];
+          h_type?: string;
           id?: string;
           location_id?: string;
           notes?: string | null;
@@ -348,6 +348,68 @@ export type Database = {
           type?: Database["public"]["Enums"]["location_type"];
         };
         Relationships: [];
+      };
+      lookup_lists: {
+        Row: {
+          created_at: string;
+          list_key: string;
+          name_ar: string;
+          name_en: string;
+        };
+        Insert: {
+          created_at?: string;
+          list_key: string;
+          name_ar: string;
+          name_en: string;
+        };
+        Update: {
+          created_at?: string;
+          list_key?: string;
+          name_ar?: string;
+          name_en?: string;
+        };
+        Relationships: [];
+      };
+      lookup_values: {
+        Row: {
+          active: boolean;
+          code: string;
+          created_at: string;
+          id: string;
+          list_key: string;
+          name_ar: string;
+          name_en: string;
+          sort_order: number;
+        };
+        Insert: {
+          active?: boolean;
+          code: string;
+          created_at?: string;
+          id?: string;
+          list_key: string;
+          name_ar: string;
+          name_en: string;
+          sort_order?: number;
+        };
+        Update: {
+          active?: boolean;
+          code?: string;
+          created_at?: string;
+          id?: string;
+          list_key?: string;
+          name_ar?: string;
+          name_en?: string;
+          sort_order?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lookup_values_list_key_fkey";
+            columns: ["list_key"];
+            isOneToOne: false;
+            referencedRelation: "lookup_lists";
+            referencedColumns: ["list_key"];
+          },
+        ];
       };
       production_batches: {
         Row: {
@@ -1156,7 +1218,7 @@ export type Database = {
       record_hospitality: {
         Args: {
           p_confirm_over_limit?: boolean;
-          p_h_type: Database["public"]["Enums"]["hospitality_type"];
+          p_h_type: string;
           p_location_id: string;
           p_note?: string;
           p_product_id: string;

@@ -12,6 +12,7 @@ import { TransferPage } from "@/pages/TransferPage";
 import { StocktakePage } from "@/pages/StocktakePage";
 import { HospitalityPage } from "@/pages/HospitalityPage";
 import { WastePage } from "@/pages/WastePage";
+import { LookupListsPage } from "@/pages/LookupListsPage";
 
 export function App() {
   return (
@@ -88,6 +89,14 @@ export function App() {
           element={
             <AppShell>
               <WastePage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/lookup-lists"
+          element={
+            <AppShell>
+              <LookupListsPage />
             </AppShell>
           }
         />
