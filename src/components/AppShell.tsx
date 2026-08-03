@@ -25,6 +25,11 @@ const NAV_ITEMS: NavItem[] = [
     labelKey: "purchase",
     roles: ["admin", "branch_manager", "warehouse_staff"],
   },
+  {
+    href: "/transfer",
+    labelKey: "transfer",
+    roles: ["admin", "branch_manager", "warehouse_staff"],
+  },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
