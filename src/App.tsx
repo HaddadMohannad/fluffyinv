@@ -10,6 +10,7 @@ import { OpeningStockPage } from "@/pages/OpeningStockPage";
 import { PurchasePage } from "@/pages/PurchasePage";
 import { TransferPage } from "@/pages/TransferPage";
 import { StocktakePage } from "@/pages/StocktakePage";
+import { HospitalityPage } from "@/pages/HospitalityPage";
 
 export function App() {
   return (
@@ -70,6 +71,14 @@ export function App() {
           element={
             <AppShell>
               <StocktakePage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/hospitality"
+          element={
+            <AppShell>
+              <HospitalityPage />
             </AppShell>
           }
         />
