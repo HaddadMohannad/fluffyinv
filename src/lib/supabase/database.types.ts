@@ -1086,6 +1086,20 @@ export type Database = {
           new_qty: number;
         }[];
       };
+      record_opening_stock: {
+        Args: {
+          p_location_id: string;
+          p_note?: string;
+          p_product_id: string;
+          p_qty: number;
+          p_unit_cost: number;
+        };
+        Returns: {
+          ledger_id: number;
+          new_avg_cost: number;
+          new_qty: number;
+        }[];
+      };
     };
     Enums: {
       hospitality_type: "vip" | "complaint" | "staff";
