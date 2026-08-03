@@ -706,6 +706,7 @@ export type Database = {
           product_id: string;
           stocktake_id: string;
           system_qty: number;
+          unit_cost: number | null;
           variance: number | null;
         };
         Insert: {
@@ -714,6 +715,7 @@ export type Database = {
           product_id: string;
           stocktake_id: string;
           system_qty: number;
+          unit_cost?: number | null;
           variance?: number | null;
         };
         Update: {
@@ -722,6 +724,7 @@ export type Database = {
           product_id?: string;
           stocktake_id?: string;
           system_qty?: number;
+          unit_cost?: number | null;
           variance?: number | null;
         };
         Relationships: [
@@ -1065,8 +1068,55 @@ export type Database = {
           },
         ];
       };
+      v_stocktake_lines: {
+        Row: {
+          counted_qty: number | null;
+          id: string | null;
+          product_id: string | null;
+          stocktake_id: string | null;
+          system_qty: number | null;
+          unit_cost: number | null;
+          variance: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "stocktake_lines_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "stocktake_lines_stocktake_id_fkey";
+            columns: ["stocktake_id"];
+            isOneToOne: false;
+            referencedRelation: "stocktakes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      v_stocktake_summary: {
+        Row: {
+          approved_at: string | null;
+          id: string | null;
+          location_id: string | null;
+          started_at: string | null;
+          status: Database["public"]["Enums"]["stocktake_status"] | null;
+          total_variance_value: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "stocktakes_location_id_fkey";
+            columns: ["location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Functions: {
+      approve_stocktake: { Args: { p_stocktake_id: string }; Returns: undefined };
       cancel_transfer: { Args: { p_transfer_id: string }; Returns: undefined };
       complete_transfer: {
         Args: { p_transfer_id: string };
@@ -1117,6 +1167,12 @@ export type Database = {
           new_qty: number;
         }[];
       };
+      save_stocktake_counts: {
+        Args: { p_lines: Json; p_stocktake_id: string };
+        Returns: undefined;
+      };
+      start_stocktake: { Args: { p_location_id: string }; Returns: string };
+      submit_stocktake: { Args: { p_stocktake_id: string }; Returns: undefined };
     };
     Enums: {
       hospitality_type: "vip" | "complaint" | "staff";
