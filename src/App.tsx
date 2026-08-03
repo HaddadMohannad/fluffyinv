@@ -8,6 +8,7 @@ import { ImportPage } from "@/pages/ImportPage";
 import { SalesDashboardPage } from "@/pages/SalesDashboardPage";
 import { OpeningStockPage } from "@/pages/OpeningStockPage";
 import { PurchasePage } from "@/pages/PurchasePage";
+import { TransferPage } from "@/pages/TransferPage";
 
 export function App() {
   return (
@@ -52,6 +53,14 @@ export function App() {
           element={
             <AppShell>
               <PurchasePage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/transfer"
+          element={
+            <AppShell>
+              <TransferPage />
             </AppShell>
           }
         />

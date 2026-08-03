@@ -1067,6 +1067,23 @@ export type Database = {
       };
     };
     Functions: {
+      cancel_transfer: { Args: { p_transfer_id: string }; Returns: undefined };
+      complete_transfer: {
+        Args: { p_transfer_id: string };
+        Returns: {
+          product_id: string;
+          qty: number;
+          unit_cost: number;
+        }[];
+      };
+      create_transfer: {
+        Args: {
+          p_from_location_id: string;
+          p_lines: Json;
+          p_to_location_id: string;
+        };
+        Returns: string;
+      };
       my_location: { Args: never; Returns: string };
       my_role: {
         Args: never;
