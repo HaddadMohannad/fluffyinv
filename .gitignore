@@ -33,3 +33,6 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# personal Claude Code settings (permission allowlists, etc.)
+.claude/settings.local.json
