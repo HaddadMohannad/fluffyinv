@@ -14,6 +14,11 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/", labelKey: "home" },
+  {
+    href: "/inventory",
+    labelKey: "inventory",
+    roles: ["admin", "branch_manager", "warehouse_staff"],
+  },
   { href: "/sales", labelKey: "sales" },
   { href: "/import", labelKey: "import", roles: ["admin", "accountant"] },
   {
