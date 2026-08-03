@@ -128,24 +128,30 @@ export function OpeningStockPage() {
     }
 
     setSaving(true);
-    const { error: insertError } = await supabase.from("stock_ledger").insert({
-      location_id: locationId,
-      product_id: productId,
-      qty: qtyNum,
-      unit_cost: costNum,
-      movement: "opening",
-      note: note || null,
-      created_by: profile?.id,
-    });
+    const { data, error: rpcError } = await supabase.rpc(
+      "record_opening_stock",
+      {
+        p_location_id: locationId,
+        p_product_id: productId,
+        p_qty: qtyNum,
+        p_unit_cost: costNum,
+        p_note: note || undefined,
+      }
+    );
     setSaving(false);
 
-    if (insertError) {
-      console.error("Opening stock insert failed:", insertError);
-      setError(insertError.message);
+    if (rpcError) {
+      console.error("Opening stock insert failed:", rpcError);
+      setError(rpcError.message);
       return;
     }
 
-    setMessage(t.entrySaved);
+    const result = data?.[0];
+    setMessage(
+      result
+        ? `${t.entrySaved} ${t.updatedQty}: ${result.new_qty}, ${t.newAverageCost}: ${result.new_avg_cost.toFixed(3)}`
+        : t.entrySaved
+    );
     setProductId("");
     setProductQuery("");
     setQty("");
@@ -155,15 +161,16 @@ export function OpeningStockPage() {
   }
 
   async function handleReverse(entry: LedgerEntry) {
-    const { error: reverseError } = await supabase.from("stock_ledger").insert({
-      location_id: entry.location_id,
-      product_id: entry.product_id,
-      qty: -entry.qty,
-      unit_cost: entry.unit_cost,
-      movement: "opening",
-      note: `Reversal of entry #${entry.id}`,
-      created_by: profile?.id,
-    });
+    const { error: reverseError } = await supabase.rpc(
+      "record_opening_stock",
+      {
+        p_location_id: entry.location_id,
+        p_product_id: entry.product_id,
+        p_qty: -entry.qty,
+        p_unit_cost: entry.unit_cost,
+        p_note: `Reversal of entry #${entry.id}`,
+      }
+    );
     if (reverseError) {
       console.error("Reversal failed:", reverseError);
       setError(reverseError.message);
