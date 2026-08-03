@@ -40,6 +40,11 @@ const NAV_ITEMS: NavItem[] = [
     labelKey: "hospitality",
     roles: ["admin", "branch_manager"],
   },
+  {
+    href: "/branches",
+    labelKey: "branches",
+    roles: ["admin"],
+  },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {

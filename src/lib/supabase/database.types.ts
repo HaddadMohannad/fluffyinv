@@ -317,10 +317,13 @@ export type Database = {
         Row: {
           active: boolean;
           city: string | null;
+          close_time: string | null;
           created_at: string;
+          day_close_cutoff_time: string | null;
           id: string;
           name_ar: string;
           name_en: string;
+          open_time: string | null;
           ownership: Database["public"]["Enums"]["ownership_type"];
           status: string;
           type: Database["public"]["Enums"]["location_type"];
@@ -328,10 +331,13 @@ export type Database = {
         Insert: {
           active?: boolean;
           city?: string | null;
+          close_time?: string | null;
           created_at?: string;
+          day_close_cutoff_time?: string | null;
           id?: string;
           name_ar: string;
           name_en: string;
+          open_time?: string | null;
           ownership?: Database["public"]["Enums"]["ownership_type"];
           status?: string;
           type: Database["public"]["Enums"]["location_type"];
@@ -339,10 +345,13 @@ export type Database = {
         Update: {
           active?: boolean;
           city?: string | null;
+          close_time?: string | null;
           created_at?: string;
+          day_close_cutoff_time?: string | null;
           id?: string;
           name_ar?: string;
           name_en?: string;
+          open_time?: string | null;
           ownership?: Database["public"]["Enums"]["ownership_type"];
           status?: string;
           type?: Database["public"]["Enums"]["location_type"];
