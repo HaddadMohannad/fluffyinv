@@ -11,6 +11,7 @@ import { PurchasePage } from "@/pages/PurchasePage";
 import { TransferPage } from "@/pages/TransferPage";
 import { StocktakePage } from "@/pages/StocktakePage";
 import { HospitalityPage } from "@/pages/HospitalityPage";
+import { WastePage } from "@/pages/WastePage";
 
 export function App() {
   return (
@@ -79,6 +80,14 @@ export function App() {
           element={
             <AppShell>
               <HospitalityPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/waste"
+          element={
+            <AppShell>
+              <WastePage />
             </AppShell>
           }
         />

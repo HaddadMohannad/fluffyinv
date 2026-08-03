@@ -1185,6 +1185,19 @@ export type Database = {
           new_qty: number;
         }[];
       };
+      record_waste: {
+        Args: {
+          p_location_id: string;
+          p_product_id: string;
+          p_qty: number;
+          p_reason: string;
+        };
+        Returns: {
+          ledger_id: number;
+          record_id: string;
+          value_lost: number;
+        }[];
+      };
       save_stocktake_counts: {
         Args: { p_lines: Json; p_stocktake_id: string };
         Returns: undefined;
