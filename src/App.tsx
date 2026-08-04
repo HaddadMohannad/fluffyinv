@@ -17,6 +17,7 @@ import { InventoryPage } from "@/pages/InventoryPage";
 import { ProductionPage } from "@/pages/ProductionPage";
 import { DailyClosingPage } from "@/pages/DailyClosingPage";
 import { AlertsPage } from "@/pages/AlertsPage";
+import { SuppliersPage } from "@/pages/SuppliersPage";
 
 export function App() {
   return (
@@ -133,6 +134,14 @@ export function App() {
           element={
             <AppShell>
               <AlertsPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/suppliers"
+          element={
+            <AppShell>
+              <SuppliersPage />
             </AppShell>
           }
         />
