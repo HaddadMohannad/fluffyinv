@@ -1350,6 +1350,14 @@ export type Database = {
         Args: { p_close_date: string; p_location_id: string; p_reason: string };
         Returns: undefined;
       };
+      review_supplier_invoice: {
+        Args: {
+          p_invoice_id: string;
+          p_review_note?: string;
+          p_status: Database["public"]["Enums"]["invoice_status"];
+        };
+        Returns: undefined;
+      };
       save_alert_settings: {
         Args: {
           p_stocktake_threshold_jod: number;
