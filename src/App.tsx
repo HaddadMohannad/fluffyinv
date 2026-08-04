@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
+import { useLocale } from "@/lib/i18n/LocaleContext";
 import { LoginPage } from "@/pages/LoginPage";
 import { ResetPasswordPage } from "@/pages/ResetPasswordPage";
 import { HomePage } from "@/pages/HomePage";
@@ -12,8 +13,20 @@ import { TransferPage } from "@/pages/TransferPage";
 import { StocktakePage } from "@/pages/StocktakePage";
 import { HospitalityPage } from "@/pages/HospitalityPage";
 import { BranchManagementPage } from "@/pages/BranchManagementPage";
+import { WastePage } from "@/pages/WastePage";
+import { LookupListsPage } from "@/pages/LookupListsPage";
+import { InventoryPage } from "@/pages/InventoryPage";
+import { ProductionPage } from "@/pages/ProductionPage";
+import { DailyClosingPage } from "@/pages/DailyClosingPage";
+import { AlertsPage } from "@/pages/AlertsPage";
+import { SuppliersPage } from "@/pages/SuppliersPage";
+import { AccountantDashboardPage } from "@/pages/AccountantDashboardPage";
+import { ConsumptionReportPage } from "@/pages/ConsumptionReportPage";
+import { CashAndExpensesPage } from "@/pages/CashAndExpensesPage";
 
 export function App() {
+  const { t } = useLocale();
+
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
@@ -22,7 +35,7 @@ export function App() {
         <Route
           path="/"
           element={
-            <AppShell>
+            <AppShell title={t.home}>
               <HomePage />
             </AppShell>
           }
@@ -30,7 +43,7 @@ export function App() {
         <Route
           path="/sales"
           element={
-            <AppShell>
+            <AppShell title={t.salesDashboardTitle}>
               <SalesDashboardPage />
             </AppShell>
           }
@@ -38,7 +51,7 @@ export function App() {
         <Route
           path="/import"
           element={
-            <AppShell>
+            <AppShell title={t.importTitle}>
               <ImportPage />
             </AppShell>
           }
@@ -46,7 +59,7 @@ export function App() {
         <Route
           path="/opening-stock"
           element={
-            <AppShell>
+            <AppShell title={t.openingStockTitle}>
               <OpeningStockPage />
             </AppShell>
           }
@@ -54,7 +67,7 @@ export function App() {
         <Route
           path="/purchase"
           element={
-            <AppShell>
+            <AppShell title={t.purchaseTitle}>
               <PurchasePage />
             </AppShell>
           }
@@ -62,7 +75,7 @@ export function App() {
         <Route
           path="/transfer"
           element={
-            <AppShell>
+            <AppShell title={t.transferTitle}>
               <TransferPage />
             </AppShell>
           }
@@ -70,7 +83,7 @@ export function App() {
         <Route
           path="/stocktake"
           element={
-            <AppShell>
+            <AppShell title={t.stocktakeTitle}>
               <StocktakePage />
             </AppShell>
           }
@@ -78,7 +91,7 @@ export function App() {
         <Route
           path="/hospitality"
           element={
-            <AppShell>
+            <AppShell title={t.hospitalityTitle}>
               <HospitalityPage />
             </AppShell>
           }
@@ -86,8 +99,88 @@ export function App() {
         <Route
           path="/branches"
           element={
-            <AppShell>
+            <AppShell title={t.branchesTitle}>
               <BranchManagementPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/waste"
+          element={
+            <AppShell title={t.wasteTitle}>
+              <WastePage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/lookup-lists"
+          element={
+            <AppShell title={t.lookupListsTitle}>
+              <LookupListsPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/inventory"
+          element={
+            <AppShell title={t.inventoryTitle}>
+              <InventoryPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/production"
+          element={
+            <AppShell title={t.productionTitle}>
+              <ProductionPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/daily-closing"
+          element={
+            <AppShell title={t.dailyClosingTitle}>
+              <DailyClosingPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/alerts"
+          element={
+            <AppShell title={t.alertsTitle}>
+              <AlertsPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/suppliers"
+          element={
+            <AppShell title={t.suppliersTitle}>
+              <SuppliersPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/accountant"
+          element={
+            <AppShell title={t.accountantDashboardTitle}>
+              <AccountantDashboardPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/consumption"
+          element={
+            <AppShell title={t.consumptionReportTitle}>
+              <ConsumptionReportPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/cash-expenses"
+          element={
+            <AppShell title={t.cashAndExpensesTitle}>
+              <CashAndExpensesPage />
             </AppShell>
           }
         />

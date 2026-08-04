@@ -77,7 +77,7 @@ export function BranchManagementPage() {
     setMessage(null);
 
     if (!form.name_en.trim() || !form.name_ar.trim()) {
-      setError(t.nameRequired);
+      setError(t.branchNameRequired);
       return;
     }
 

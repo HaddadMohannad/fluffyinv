@@ -14,6 +14,77 @@ export type Database = {
   };
   public: {
     Tables: {
+      alert_settings: {
+        Row: {
+          id: boolean;
+          stocktake_alert_threshold_jod: number;
+          updated_at: string;
+          updated_by: string | null;
+          waste_alert_threshold_jod: number;
+        };
+        Insert: {
+          id?: boolean;
+          stocktake_alert_threshold_jod?: number;
+          updated_at?: string;
+          updated_by?: string | null;
+          waste_alert_threshold_jod?: number;
+        };
+        Update: {
+          id?: boolean;
+          stocktake_alert_threshold_jod?: number;
+          updated_at?: string;
+          updated_by?: string | null;
+          waste_alert_threshold_jod?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "alert_settings_updated_by_fkey";
+            columns: ["updated_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      cash_counts: {
+        Row: {
+          counted_amount: number;
+          count_date: string;
+          created_at: string;
+          created_by: string | null;
+          location_id: string;
+        };
+        Insert: {
+          counted_amount: number;
+          count_date: string;
+          created_at?: string;
+          created_by?: string | null;
+          location_id: string;
+        };
+        Update: {
+          counted_amount?: number;
+          count_date?: string;
+          created_at?: string;
+          created_by?: string | null;
+          location_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "cash_counts_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "cash_counts_location_id_fkey";
+            columns: ["location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       day_closes: {
         Row: {
           close_date: string;
@@ -66,6 +137,144 @@ export type Database = {
           },
         ];
       };
+      employee_cash_transactions: {
+        Row: {
+          amount: number;
+          created_at: string;
+          created_by: string | null;
+          employee_id: string;
+          id: string;
+          location_id: string;
+          note: string | null;
+          transaction_date: string;
+          type: string;
+        };
+        Insert: {
+          amount: number;
+          created_at?: string;
+          created_by?: string | null;
+          employee_id: string;
+          id?: string;
+          location_id: string;
+          note?: string | null;
+          transaction_date: string;
+          type: string;
+        };
+        Update: {
+          amount?: number;
+          created_at?: string;
+          created_by?: string | null;
+          employee_id?: string;
+          id?: string;
+          location_id?: string;
+          note?: string | null;
+          transaction_date?: string;
+          type?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "employee_cash_transactions_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "employee_cash_transactions_employee_id_fkey";
+            columns: ["employee_id"];
+            isOneToOne: false;
+            referencedRelation: "employees";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "employee_cash_transactions_location_id_fkey";
+            columns: ["location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      employees: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          id: string;
+          location_id: string;
+          name: string;
+        };
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          location_id: string;
+          name: string;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          location_id?: string;
+          name?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "employees_location_id_fkey";
+            columns: ["location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      expenses: {
+        Row: {
+          amount: number;
+          category: string;
+          created_at: string;
+          created_by: string | null;
+          description: string | null;
+          expense_date: string;
+          id: string;
+          location_id: string;
+        };
+        Insert: {
+          amount: number;
+          category: string;
+          created_at?: string;
+          created_by?: string | null;
+          description?: string | null;
+          expense_date: string;
+          id?: string;
+          location_id: string;
+        };
+        Update: {
+          amount?: number;
+          category?: string;
+          created_at?: string;
+          created_by?: string | null;
+          description?: string | null;
+          expense_date?: string;
+          id?: string;
+          location_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "expenses_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "expenses_location_id_fkey";
+            columns: ["location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       hospitality_limits: {
         Row: {
           limit_value: number;
@@ -96,7 +305,7 @@ export type Database = {
         Row: {
           created_at: string;
           created_by: string | null;
-          h_type: Database["public"]["Enums"]["hospitality_type"];
+          h_type: string;
           id: string;
           location_id: string;
           notes: string | null;
@@ -107,7 +316,7 @@ export type Database = {
         Insert: {
           created_at?: string;
           created_by?: string | null;
-          h_type: Database["public"]["Enums"]["hospitality_type"];
+          h_type: string;
           id?: string;
           location_id: string;
           notes?: string | null;
@@ -118,7 +327,7 @@ export type Database = {
         Update: {
           created_at?: string;
           created_by?: string | null;
-          h_type?: Database["public"]["Enums"]["hospitality_type"];
+          h_type?: string;
           id?: string;
           location_id?: string;
           notes?: string | null;
@@ -358,6 +567,68 @@ export type Database = {
         };
         Relationships: [];
       };
+      lookup_lists: {
+        Row: {
+          created_at: string;
+          list_key: string;
+          name_ar: string;
+          name_en: string;
+        };
+        Insert: {
+          created_at?: string;
+          list_key: string;
+          name_ar: string;
+          name_en: string;
+        };
+        Update: {
+          created_at?: string;
+          list_key?: string;
+          name_ar?: string;
+          name_en?: string;
+        };
+        Relationships: [];
+      };
+      lookup_values: {
+        Row: {
+          active: boolean;
+          code: string;
+          created_at: string;
+          id: string;
+          list_key: string;
+          name_ar: string;
+          name_en: string;
+          sort_order: number;
+        };
+        Insert: {
+          active?: boolean;
+          code: string;
+          created_at?: string;
+          id?: string;
+          list_key: string;
+          name_ar: string;
+          name_en: string;
+          sort_order?: number;
+        };
+        Update: {
+          active?: boolean;
+          code?: string;
+          created_at?: string;
+          id?: string;
+          list_key?: string;
+          name_ar?: string;
+          name_en?: string;
+          sort_order?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lookup_values_list_key_fkey";
+            columns: ["list_key"];
+            isOneToOne: false;
+            referencedRelation: "lookup_lists";
+            referencedColumns: ["list_key"];
+          },
+        ];
+      };
       production_batches: {
         Row: {
           created_at: string;
@@ -437,6 +708,7 @@ export type Database = {
           is_combo: boolean;
           name_ar: string;
           name_en: string;
+          reorder_threshold: number | null;
           selling_price: number | null;
           type: Database["public"]["Enums"]["product_type"];
           unit: Database["public"]["Enums"]["product_unit"];
@@ -451,6 +723,7 @@ export type Database = {
           is_combo?: boolean;
           name_ar: string;
           name_en: string;
+          reorder_threshold?: number | null;
           selling_price?: number | null;
           type: Database["public"]["Enums"]["product_type"];
           unit: Database["public"]["Enums"]["product_unit"];
@@ -465,6 +738,7 @@ export type Database = {
           is_combo?: boolean;
           name_ar?: string;
           name_en?: string;
+          reorder_threshold?: number | null;
           selling_price?: number | null;
           type?: Database["public"]["Enums"]["product_type"];
           unit?: Database["public"]["Enums"]["product_unit"];
@@ -1127,6 +1401,10 @@ export type Database = {
     Functions: {
       approve_stocktake: { Args: { p_stocktake_id: string }; Returns: undefined };
       cancel_transfer: { Args: { p_transfer_id: string }; Returns: undefined };
+      close_day: {
+        Args: { p_close_date: string; p_location_id: string };
+        Returns: undefined;
+      };
       complete_transfer: {
         Args: { p_transfer_id: string };
         Returns: {
@@ -1142,6 +1420,29 @@ export type Database = {
           p_to_location_id: string;
         };
         Returns: string;
+      };
+      get_daily_closing_report: {
+        Args: { p_close_date: string; p_location_id: string };
+        Returns: {
+          current_qty: number;
+          expected_closing_qty: number;
+          hospitality_qty: number;
+          opening_qty: number;
+          product_id: string;
+          received_qty: number;
+          sold_qty: number;
+          waste_qty: number;
+        }[];
+      };
+      get_smart_alerts: {
+        Args: never;
+        Returns: {
+          alert_type: string;
+          detail: Json;
+          location_id: string;
+          metric_value: number;
+          threshold_value: number;
+        }[];
       };
       my_location: { Args: never; Returns: string };
       my_role: {
@@ -1165,7 +1466,7 @@ export type Database = {
       record_hospitality: {
         Args: {
           p_confirm_over_limit?: boolean;
-          p_h_type: Database["public"]["Enums"]["hospitality_type"];
+          p_h_type: string;
           p_location_id: string;
           p_note?: string;
           p_product_id: string;
@@ -1193,6 +1494,56 @@ export type Database = {
           new_avg_cost: number;
           new_qty: number;
         }[];
+      };
+      record_production_batch: {
+        Args: {
+          p_input_product_id: string;
+          p_input_qty: number;
+          p_location_id: string;
+          p_output_product_id: string;
+          p_output_qty: number;
+          p_total_cost: number;
+        };
+        Returns: {
+          batch_id: string;
+          cost_per_unit: number;
+          input_ledger_id: number;
+          new_output_avg_cost: number;
+          output_ledger_id: number;
+          yield_pct: number;
+        }[];
+      };
+      record_waste: {
+        Args: {
+          p_location_id: string;
+          p_product_id: string;
+          p_qty: number;
+          p_reason: string;
+        };
+        Returns: {
+          ledger_id: number;
+          record_id: string;
+          value_lost: number;
+        }[];
+      };
+      reopen_day: {
+        Args: { p_close_date: string; p_location_id: string; p_reason: string };
+        Returns: undefined;
+      };
+      review_supplier_invoice: {
+        Args: {
+          p_invoice_id: string;
+          p_review_note?: string;
+          p_status: Database["public"]["Enums"]["invoice_status"];
+        };
+        Returns: undefined;
+      };
+      save_alert_settings: {
+        Args: {
+          p_stocktake_threshold_jod: number;
+          p_waste_threshold_jod: number;
+        };
+        Returns: undefined;
       };
       save_stocktake_counts: {
         Args: { p_lines: Json; p_stocktake_id: string };

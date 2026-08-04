@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import { App } from "./App";
 import { AuthProvider } from "@/lib/auth/AuthContext";
 import { LocaleProvider } from "@/lib/i18n/LocaleContext";
+import { LocationProvider } from "@/lib/location/LocationContext";
 import "./index.css";
 
 createRoot(document.getElementById("root")!).render(
@@ -11,7 +12,9 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter basename="/fluffyinv">
       <LocaleProvider>
         <AuthProvider>
-          <App />
+          <LocationProvider>
+            <App />
+          </LocationProvider>
         </AuthProvider>
       </LocaleProvider>
     </BrowserRouter>

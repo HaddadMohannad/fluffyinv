@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
+import { useActiveLocation } from "@/lib/location/LocationContext";
 import { supabase } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
 
@@ -12,15 +13,13 @@ type PendingApproval = Stocktake & { lines: StocktakeLine[] };
 export function StocktakePage() {
   const { profile } = useAuth();
   const { t } = useLocale();
+  const { locations, locationId } = useActiveLocation();
 
   const canCount =
     profile?.role === "admin" || profile?.role === "branch_manager";
   const isAdmin = profile?.role === "admin";
-  const isLocationLocked = profile?.role !== "admin";
 
-  const [locations, setLocations] = useState<Tables<"locations">[]>([]);
   const [products, setProducts] = useState<Tables<"products">[]>([]);
-  const [selectedLocationId, setSelectedLocationId] = useState("");
   const [activeStocktake, setActiveStocktake] = useState<Stocktake | null>(
     null
   );
@@ -39,17 +38,8 @@ export function StocktakePage() {
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [summary, setSummary] = useState<StocktakeSummary[]>([]);
 
-  const locationId = isLocationLocked
-    ? (profile?.location_id ?? "")
-    : selectedLocationId;
-
   useEffect(() => {
     if (!canCount) return;
-    supabase
-      .from("locations")
-      .select("*")
-      .order("name_en")
-      .then(({ data }) => setLocations(data ?? []));
     supabase
       .from("products")
       .select("*")
@@ -238,25 +228,6 @@ export function StocktakePage() {
       <h1 className="text-fluffy-dark text-2xl font-semibold dark:text-zinc-50">
         {t.stocktakeTitle}
       </h1>
-
-      <label className="flex max-w-md flex-col gap-1 text-sm">
-        {t.location}
-        <select
-          value={locationId}
-          onChange={(e) => setSelectedLocationId(e.target.value)}
-          disabled={isLocationLocked}
-          className="h-11 rounded-md border border-zinc-300 px-3 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900"
-        >
-          <option value="" disabled>
-            {t.location}
-          </option>
-          {locations.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.name_en}
-            </option>
-          ))}
-        </select>
-      </label>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
       {message && <p className="text-sm text-green-600">{message}</p>}
