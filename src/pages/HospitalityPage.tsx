@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
+import { useActiveLocation } from "@/lib/location/LocationContext";
 import { supabase } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
 
@@ -9,15 +10,13 @@ const CONFIRMATION_PREFIX = "CONFIRMATION_REQUIRED: ";
 export function HospitalityPage() {
   const { profile } = useAuth();
   const { t, locale } = useLocale();
+  const { locations, locationId } = useActiveLocation();
 
   const canWrite =
     profile?.role === "admin" || profile?.role === "branch_manager";
   const isAdmin = profile?.role === "admin";
-  const isLocationLocked = profile?.role !== "admin";
 
-  const [locations, setLocations] = useState<Tables<"locations">[]>([]);
   const [products, setProducts] = useState<Tables<"products">[]>([]);
-  const [selectedLocationId, setSelectedLocationId] = useState("");
   const [productQuery, setProductQuery] = useState("");
   const [productId, setProductId] = useState("");
   const [qty, setQty] = useState("");
@@ -42,17 +41,8 @@ export function HospitalityPage() {
   const [savingLimit, setSavingLimit] = useState(false);
   const [limitMessage, setLimitMessage] = useState<string | null>(null);
 
-  const locationId = isLocationLocked
-    ? (profile?.location_id ?? "")
-    : selectedLocationId;
-
   useEffect(() => {
     if (!canWrite) return;
-    supabase
-      .from("locations")
-      .select("*")
-      .order("name_en")
-      .then(({ data }) => setLocations(data ?? []));
     supabase
       .from("products")
       .select("*")
@@ -239,25 +229,6 @@ export function HospitalityPage() {
       </h1>
 
       <form onSubmit={handleSubmit} className="flex max-w-md flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm">
-          {t.location}
-          <select
-            value={locationId}
-            onChange={(e) => setSelectedLocationId(e.target.value)}
-            disabled={isLocationLocked}
-            className="h-11 rounded-md border border-zinc-300 px-3 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900"
-          >
-            <option value="" disabled>
-              {t.location}
-            </option>
-            {locations.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name_en}
-              </option>
-            ))}
-          </select>
-        </label>
-
         {locationId && monthLimit !== null && monthUsage !== null && (
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
             {t.monthUsageLabel}: {monthUsage.toFixed(3)} / {monthLimit.toFixed(3)}{" "}

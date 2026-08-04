@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
+import { useActiveLocation } from "@/lib/location/LocationContext";
 import { supabase } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
 
@@ -14,6 +15,7 @@ type DraftLine = { product_id: string; name: string; qty: string };
 export function TransferPage() {
   const { profile } = useAuth();
   const { t } = useLocale();
+  const { locations, locationId } = useActiveLocation();
 
   const canWrite =
     profile?.role === "admin" ||
@@ -24,7 +26,6 @@ export function TransferPage() {
   const isAdmin = profile?.role === "admin";
   const isWarehouseStaff = profile?.role === "warehouse_staff";
 
-  const [locations, setLocations] = useState<Tables<"locations">[]>([]);
   const [products, setProducts] = useState<Tables<"products">[]>([]);
   const [fromLocationId, setFromLocationId] = useState("");
   const [toLocationId, setToLocationId] = useState("");
@@ -41,11 +42,6 @@ export function TransferPage() {
   useEffect(() => {
     if (!canWrite) return;
     supabase
-      .from("locations")
-      .select("*")
-      .order("name_en")
-      .then(({ data }) => setLocations(data ?? []));
-    supabase
       .from("products")
       .select("*")
       .eq("active", true)
@@ -53,6 +49,16 @@ export function TransferPage() {
       .order("name_en")
       .then(({ data }) => setProducts(data ?? []));
   }, [canWrite]);
+
+  // Pre-fill "from" with the header's active location for convenience --
+  // still freely changeable, since a transfer inherently needs two
+  // distinct locations.
+  useEffect(() => {
+    if (!fromLocationId && locationId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time default fill from the header's active location
+      setFromLocationId(locationId);
+    }
+  }, [locationId, fromLocationId]);
 
   useEffect(() => {
     if (!canWrite) return;

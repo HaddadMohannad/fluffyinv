@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
+import { useActiveLocation } from "@/lib/location/LocationContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { dictionary } from "@/lib/i18n/dictionary";
 
@@ -53,8 +54,10 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { t } = useLocale();
-  const { signOut, profile } = useAuth();
+  const { t, locale } = useLocale();
+  const { signOut, profile, location } = useAuth();
+  const { locations, locationId, isLocationLocked, setSelectedLocationId } =
+    useActiveLocation();
 
   const visibleItems = NAV_ITEMS.filter(
     (item) =>
@@ -68,6 +71,26 @@ export function AppShell({ children }: { children: ReactNode }) {
           {t.appName}
         </span>
         <div className="flex items-center gap-2">
+          {profile &&
+            (isLocationLocked ? (
+              location && (
+                <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                  {locale === "ar" ? location.name_ar : location.name_en}
+                </span>
+              )
+            ) : (
+              <select
+                value={locationId}
+                onChange={(e) => setSelectedLocationId(e.target.value)}
+                className="h-9 rounded-md border border-zinc-300 px-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+              >
+                {locations.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {locale === "ar" ? l.name_ar : l.name_en}
+                  </option>
+                ))}
+              </select>
+            ))}
           <LanguageToggle />
           <button
             type="button"

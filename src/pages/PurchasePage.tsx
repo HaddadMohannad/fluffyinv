@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
+import { useActiveLocation } from "@/lib/location/LocationContext";
 import { supabase } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
 
@@ -9,15 +10,14 @@ type LedgerEntry = Tables<"stock_ledger">;
 export function PurchasePage() {
   const { profile } = useAuth();
   const { t } = useLocale();
+  const { locationId } = useActiveLocation();
 
   const canWrite =
     profile?.role === "admin" ||
     profile?.role === "branch_manager" ||
     profile?.role === "warehouse_staff";
 
-  const [locations, setLocations] = useState<Tables<"locations">[]>([]);
   const [products, setProducts] = useState<Tables<"products">[]>([]);
-  const [selectedLocationId, setSelectedLocationId] = useState("");
   const [productQuery, setProductQuery] = useState("");
   const [productId, setProductId] = useState("");
   const [qty, setQty] = useState("");
@@ -30,18 +30,8 @@ export function PurchasePage() {
   const [recent, setRecent] = useState<LedgerEntry[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const isLocationLocked = profile?.role !== "admin";
-  const locationId = isLocationLocked
-    ? (profile?.location_id ?? "")
-    : selectedLocationId;
-
   useEffect(() => {
     if (!canWrite) return;
-    supabase
-      .from("locations")
-      .select("*")
-      .order("name_en")
-      .then(({ data }) => setLocations(data ?? []));
     // Only raw/processed items are purchased -- sellable menu items are
     // what's sold, not bought.
     supabase
@@ -153,25 +143,6 @@ export function PurchasePage() {
       </h1>
 
       <form onSubmit={handleSubmit} className="flex max-w-md flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm">
-          {t.location}
-          <select
-            value={locationId}
-            onChange={(e) => setSelectedLocationId(e.target.value)}
-            disabled={isLocationLocked}
-            className="h-11 rounded-md border border-zinc-300 px-3 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900"
-          >
-            <option value="" disabled>
-              {t.location}
-            </option>
-            {locations.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name_en}
-              </option>
-            ))}
-          </select>
-        </label>
-
         <label className="flex flex-col gap-1 text-sm">
           {t.product}
           <input

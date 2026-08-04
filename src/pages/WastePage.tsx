@@ -1,20 +1,19 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
+import { useActiveLocation } from "@/lib/location/LocationContext";
 import { supabase } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
 
 export function WastePage() {
   const { profile } = useAuth();
   const { t, locale } = useLocale();
+  const { locationId } = useActiveLocation();
 
   const canWrite =
     profile?.role === "admin" || profile?.role === "branch_manager";
-  const isLocationLocked = profile?.role !== "admin";
 
-  const [locations, setLocations] = useState<Tables<"locations">[]>([]);
   const [products, setProducts] = useState<Tables<"products">[]>([]);
-  const [selectedLocationId, setSelectedLocationId] = useState("");
   const [productQuery, setProductQuery] = useState("");
   const [productId, setProductId] = useState("");
   const [qty, setQty] = useState("");
@@ -27,10 +26,6 @@ export function WastePage() {
   const [recent, setRecent] = useState<Tables<"waste_records">[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const locationId = isLocationLocked
-    ? (profile?.location_id ?? "")
-    : selectedLocationId;
-
   const reasonLabel = useMemo(() => {
     const map = new Map(
       reasons.map((r) => [r.code, locale === "ar" ? r.name_ar : r.name_en])
@@ -40,11 +35,6 @@ export function WastePage() {
 
   useEffect(() => {
     if (!canWrite) return;
-    supabase
-      .from("locations")
-      .select("*")
-      .order("name_en")
-      .then(({ data }) => setLocations(data ?? []));
     supabase
       .from("products")
       .select("*")
@@ -155,25 +145,6 @@ export function WastePage() {
       </h1>
 
       <form onSubmit={handleSubmit} className="flex max-w-md flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm">
-          {t.location}
-          <select
-            value={locationId}
-            onChange={(e) => setSelectedLocationId(e.target.value)}
-            disabled={isLocationLocked}
-            className="h-11 rounded-md border border-zinc-300 px-3 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900"
-          >
-            <option value="" disabled>
-              {t.location}
-            </option>
-            {locations.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name_en}
-              </option>
-            ))}
-          </select>
-        </label>
-
         <label className="flex flex-col gap-1 text-sm">
           {t.product}
           <input
