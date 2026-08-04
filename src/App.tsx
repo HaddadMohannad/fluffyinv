@@ -14,6 +14,7 @@ import { HospitalityPage } from "@/pages/HospitalityPage";
 import { WastePage } from "@/pages/WastePage";
 import { LookupListsPage } from "@/pages/LookupListsPage";
 import { InventoryPage } from "@/pages/InventoryPage";
+import { ProductionPage } from "@/pages/ProductionPage";
 
 export function App() {
   return (
@@ -106,6 +107,14 @@ export function App() {
           element={
             <AppShell>
               <InventoryPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/production"
+          element={
+            <AppShell>
+              <ProductionPage />
             </AppShell>
           }
         />

@@ -1247,6 +1247,24 @@ export type Database = {
           new_qty: number;
         }[];
       };
+      record_production_batch: {
+        Args: {
+          p_input_product_id: string;
+          p_input_qty: number;
+          p_location_id: string;
+          p_output_product_id: string;
+          p_output_qty: number;
+          p_total_cost: number;
+        };
+        Returns: {
+          batch_id: string;
+          cost_per_unit: number;
+          input_ledger_id: number;
+          new_output_avg_cost: number;
+          output_ledger_id: number;
+          yield_pct: number;
+        }[];
+      };
       record_waste: {
         Args: {
           p_location_id: string;
