@@ -88,12 +88,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="flex flex-1 flex-col pb-16 md:pb-0">{children}</main>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 flex h-16 border-t border-zinc-200 bg-white md:hidden dark:border-zinc-800 dark:bg-black">
+      <nav className="fixed inset-x-0 bottom-0 flex h-16 gap-1 overflow-x-auto border-t border-zinc-200 bg-white md:hidden dark:border-zinc-800 dark:bg-black">
         {visibleItems.map((item) => (
           <Link
             key={item.href}
             to={item.href}
-            className="flex flex-1 flex-col items-center justify-center gap-1 text-sm font-medium"
+            className="flex min-w-20 shrink-0 flex-col items-center justify-center gap-1 whitespace-nowrap px-2 text-xs font-medium"
           >
             {t[item.labelKey]}
           </Link>
