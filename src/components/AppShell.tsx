@@ -45,6 +45,11 @@ const NAV_ITEMS: NavItem[] = [
     labelKey: "waste",
     roles: ["admin", "branch_manager"],
   },
+  {
+    href: "/lookup-lists",
+    labelKey: "lookupLists",
+    roles: ["admin"],
+  },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {

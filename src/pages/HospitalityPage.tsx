@@ -2,15 +2,13 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
 import { supabase } from "@/lib/supabase/client";
-import type { Enums, Tables } from "@/lib/supabase/database.types";
+import type { Tables } from "@/lib/supabase/database.types";
 
 const CONFIRMATION_PREFIX = "CONFIRMATION_REQUIRED: ";
 
-type HospitalityTypeValue = Enums<"hospitality_type">;
-
 export function HospitalityPage() {
   const { profile } = useAuth();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
 
   const canWrite =
     profile?.role === "admin" || profile?.role === "branch_manager";
@@ -23,7 +21,10 @@ export function HospitalityPage() {
   const [productQuery, setProductQuery] = useState("");
   const [productId, setProductId] = useState("");
   const [qty, setQty] = useState("");
-  const [hType, setHType] = useState<HospitalityTypeValue>("vip");
+  const [hospitalityTypes, setHospitalityTypes] = useState<
+    Tables<"lookup_values">[]
+  >([]);
+  const [hType, setHType] = useState("");
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -58,6 +59,19 @@ export function HospitalityPage() {
       .eq("active", true)
       .order("name_en")
       .then(({ data }) => setProducts(data ?? []));
+    supabase
+      .from("lookup_values")
+      .select("*")
+      .eq("list_key", "hospitality_type")
+      .eq("active", true)
+      .order("sort_order")
+      .then(({ data }) => {
+        const rows = data ?? [];
+        setHospitalityTypes(rows);
+        setHType((current) =>
+          current || (rows.length > 0 ? rows[0].code : "")
+        );
+      });
   }, [canWrite]);
 
   useEffect(() => {
@@ -119,7 +133,7 @@ export function HospitalityPage() {
     setProductId("");
     setProductQuery("");
     setQty("");
-    setHType("vip");
+    setHType(hospitalityTypes.length > 0 ? hospitalityTypes[0].code : "");
     setNote("");
   }
 
@@ -300,12 +314,14 @@ export function HospitalityPage() {
           {t.hospitalityTypeLabel}
           <select
             value={hType}
-            onChange={(e) => setHType(e.target.value as HospitalityTypeValue)}
+            onChange={(e) => setHType(e.target.value)}
             className="h-11 rounded-md border border-zinc-300 px-3 dark:border-zinc-700 dark:bg-zinc-900"
           >
-            <option value="vip">{t.typeVip}</option>
-            <option value="complaint">{t.typeComplaint}</option>
-            <option value="staff">{t.typeStaff}</option>
+            {hospitalityTypes.map((type) => (
+              <option key={type.code} value={type.code}>
+                {locale === "ar" ? type.name_ar : type.name_en}
+              </option>
+            ))}
           </select>
         </label>
 
@@ -340,7 +356,7 @@ export function HospitalityPage() {
 
         <button
           type="submit"
-          disabled={saving || !locationId || !productId}
+          disabled={saving || !locationId || !productId || !hType}
           className="bg-fluffy-orange h-11 rounded-md text-base font-medium text-white disabled:opacity-60"
         >
           {saving ? t.submitting : t.submitEntry}
