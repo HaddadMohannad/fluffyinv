@@ -7,6 +7,18 @@
       "mcp__6a395d2c-7a15-4554-9461-7d531042d68a__list_issues",
       "mcp__6a395d2c-7a15-4554-9461-7d531042d68a__list_teams",
       "mcp__b70ed04e-23a0-41c0-8d45-3a57a9569c26__get_advisors",
+      "mcp__b70ed04e-23a0-41c0-8d45-3a57a9569c26__execute_sql",
+      "mcp__b70ed04e-23a0-41c0-8d45-3a57a9569c26__apply_migration",
+      "mcp__b70ed04e-23a0-41c0-8d45-3a57a9569c26__list_tables",
+      "mcp__b70ed04e-23a0-41c0-8d45-3a57a9569c26__list_migrations",
+      "mcp__b70ed04e-23a0-41c0-8d45-3a57a9569c26__list_extensions",
+      "mcp__b70ed04e-23a0-41c0-8d45-3a57a9569c26__get_logs",
+      "mcp__b70ed04e-23a0-41c0-8d45-3a57a9569c26__generate_typescript_types",
+      "mcp__b70ed04e-23a0-41c0-8d45-3a57a9569c26__get_project",
+      "mcp__b70ed04e-23a0-41c0-8d45-3a57a9569c26__get_project_url",
+      "mcp__b70ed04e-23a0-41c0-8d45-3a57a9569c26__get_publishable_keys",
+      "mcp__b70ed04e-23a0-41c0-8d45-3a57a9569c26__list_branches",
+      "mcp__b70ed04e-23a0-41c0-8d45-3a57a9569c26__search_docs",
       "mcp__github__actions_list",
       "mcp__github__pull_request_read"
     ]
