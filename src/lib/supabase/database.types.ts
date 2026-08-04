@@ -46,6 +46,45 @@ export type Database = {
           },
         ];
       };
+      cash_counts: {
+        Row: {
+          counted_amount: number;
+          count_date: string;
+          created_at: string;
+          created_by: string | null;
+          location_id: string;
+        };
+        Insert: {
+          counted_amount: number;
+          count_date: string;
+          created_at?: string;
+          created_by?: string | null;
+          location_id: string;
+        };
+        Update: {
+          counted_amount?: number;
+          count_date?: string;
+          created_at?: string;
+          created_by?: string | null;
+          location_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "cash_counts_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "cash_counts_location_id_fkey";
+            columns: ["location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       day_closes: {
         Row: {
           close_date: string;
@@ -94,6 +133,144 @@ export type Database = {
             columns: ["reopened_by"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      employee_cash_transactions: {
+        Row: {
+          amount: number;
+          created_at: string;
+          created_by: string | null;
+          employee_id: string;
+          id: string;
+          location_id: string;
+          note: string | null;
+          transaction_date: string;
+          type: string;
+        };
+        Insert: {
+          amount: number;
+          created_at?: string;
+          created_by?: string | null;
+          employee_id: string;
+          id?: string;
+          location_id: string;
+          note?: string | null;
+          transaction_date: string;
+          type: string;
+        };
+        Update: {
+          amount?: number;
+          created_at?: string;
+          created_by?: string | null;
+          employee_id?: string;
+          id?: string;
+          location_id?: string;
+          note?: string | null;
+          transaction_date?: string;
+          type?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "employee_cash_transactions_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "employee_cash_transactions_employee_id_fkey";
+            columns: ["employee_id"];
+            isOneToOne: false;
+            referencedRelation: "employees";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "employee_cash_transactions_location_id_fkey";
+            columns: ["location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      employees: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          id: string;
+          location_id: string;
+          name: string;
+        };
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          location_id: string;
+          name: string;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          location_id?: string;
+          name?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "employees_location_id_fkey";
+            columns: ["location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      expenses: {
+        Row: {
+          amount: number;
+          category: string;
+          created_at: string;
+          created_by: string | null;
+          description: string | null;
+          expense_date: string;
+          id: string;
+          location_id: string;
+        };
+        Insert: {
+          amount: number;
+          category: string;
+          created_at?: string;
+          created_by?: string | null;
+          description?: string | null;
+          expense_date: string;
+          id?: string;
+          location_id: string;
+        };
+        Update: {
+          amount?: number;
+          category?: string;
+          created_at?: string;
+          created_by?: string | null;
+          description?: string | null;
+          expense_date?: string;
+          id?: string;
+          location_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "expenses_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "expenses_location_id_fkey";
+            columns: ["location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
             referencedColumns: ["id"];
           },
         ];
