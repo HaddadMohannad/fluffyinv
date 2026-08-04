@@ -21,6 +21,7 @@ export function InventoryPage() {
     profile?.role === "warehouse_staff";
   const canWasteOrHospitality =
     profile?.role === "admin" || profile?.role === "branch_manager";
+  const canEditReorderThreshold = profile?.role === "admin";
 
   const [products, setProducts] = useState<Tables<"products">[]>([]);
   const [stock, setStock] = useState<Record<string, number>>({});
@@ -29,6 +30,7 @@ export function InventoryPage() {
     action: QuickAction;
     product: Tables<"products">;
   } | null>(null);
+  const [reorderEdits, setReorderEdits] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!canView) return;
@@ -86,6 +88,33 @@ export function InventoryPage() {
     setRefreshKey((k) => k + 1);
   }
 
+  function reorderValue(product: Tables<"products">) {
+    return product.id in reorderEdits
+      ? reorderEdits[product.id]
+      : (product.reorder_threshold?.toString() ?? "");
+  }
+
+  async function handleSaveReorderThreshold(product: Tables<"products">) {
+    const raw = reorderValue(product).trim();
+    const parsed = raw === "" ? null : Number(raw);
+    if (parsed !== null && !Number.isFinite(parsed)) return;
+    if (parsed === (product.reorder_threshold ?? null)) return;
+
+    const { error: updateError } = await supabase
+      .from("products")
+      .update({ reorder_threshold: parsed })
+      .eq("id", product.id);
+    if (updateError) {
+      console.error("Save reorder threshold failed:", updateError);
+      return;
+    }
+    setProducts((prev) =>
+      prev.map((p) =>
+        p.id === product.id ? { ...p, reorder_threshold: parsed } : p
+      )
+    );
+  }
+
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
       <h1 className="text-fluffy-dark text-2xl font-semibold dark:text-zinc-50">
@@ -106,6 +135,9 @@ export function InventoryPage() {
                 <th className="p-2 text-end">{t.quantity}</th>
                 <th className="p-2 text-end">{t.unitCost}</th>
                 <th className="p-2 text-end">{t.totalValueColumn}</th>
+                {canEditReorderThreshold && (
+                  <th className="p-2 text-end">{t.reorderThresholdColumn}</th>
+                )}
                 <th className="p-2" />
               </tr>
             </thead>
@@ -127,6 +159,25 @@ export function InventoryPage() {
                       {(product.avg_cost ?? 0).toFixed(3)}
                     </td>
                     <td className="p-2 text-end">{totalValue.toFixed(3)}</td>
+                    {canEditReorderThreshold && (
+                      <td className="p-2 text-end">
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          min="0"
+                          step="any"
+                          value={reorderValue(product)}
+                          onChange={(e) =>
+                            setReorderEdits((prev) => ({
+                              ...prev,
+                              [product.id]: e.target.value,
+                            }))
+                          }
+                          onBlur={() => handleSaveReorderThreshold(product)}
+                          className="h-8 w-20 rounded-md border border-zinc-300 px-2 text-end dark:border-zinc-700 dark:bg-zinc-900"
+                        />
+                      </td>
+                    )}
                     <td className="p-2 text-end">
                       <div className="flex justify-end gap-1">
                         {canWasteOrHospitality && (
