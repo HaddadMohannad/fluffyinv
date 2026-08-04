@@ -14,6 +14,38 @@ export type Database = {
   };
   public: {
     Tables: {
+      alert_settings: {
+        Row: {
+          id: boolean;
+          stocktake_alert_threshold_jod: number;
+          updated_at: string;
+          updated_by: string | null;
+          waste_alert_threshold_jod: number;
+        };
+        Insert: {
+          id?: boolean;
+          stocktake_alert_threshold_jod?: number;
+          updated_at?: string;
+          updated_by?: string | null;
+          waste_alert_threshold_jod?: number;
+        };
+        Update: {
+          id?: boolean;
+          stocktake_alert_threshold_jod?: number;
+          updated_at?: string;
+          updated_by?: string | null;
+          waste_alert_threshold_jod?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "alert_settings_updated_by_fkey";
+            columns: ["updated_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       day_closes: {
         Row: {
           close_date: string;
@@ -1222,6 +1254,16 @@ export type Database = {
           waste_qty: number;
         }[];
       };
+      get_smart_alerts: {
+        Args: never;
+        Returns: {
+          alert_type: string;
+          detail: Json;
+          location_id: string;
+          metric_value: number;
+          threshold_value: number;
+        }[];
+      };
       my_location: { Args: never; Returns: string };
       my_role: {
         Args: never;
@@ -1306,6 +1348,13 @@ export type Database = {
       };
       reopen_day: {
         Args: { p_close_date: string; p_location_id: string; p_reason: string };
+        Returns: undefined;
+      };
+      save_alert_settings: {
+        Args: {
+          p_stocktake_threshold_jod: number;
+          p_waste_threshold_jod: number;
+        };
         Returns: undefined;
       };
       save_stocktake_counts: {

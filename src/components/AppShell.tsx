@@ -47,6 +47,11 @@ const NAV_ITEMS: NavItem[] = [
     roles: ["admin", "accountant", "branch_manager"],
   },
   {
+    href: "/alerts",
+    labelKey: "alerts",
+    roles: ["admin", "accountant"],
+  },
+  {
     href: "/stocktake",
     labelKey: "stocktake",
     roles: ["admin", "branch_manager"],
