@@ -20,6 +20,7 @@ import { AlertsPage } from "@/pages/AlertsPage";
 import { SuppliersPage } from "@/pages/SuppliersPage";
 import { AccountantDashboardPage } from "@/pages/AccountantDashboardPage";
 import { ConsumptionReportPage } from "@/pages/ConsumptionReportPage";
+import { CashAndExpensesPage } from "@/pages/CashAndExpensesPage";
 
 export function App() {
   return (
@@ -160,6 +161,14 @@ export function App() {
           element={
             <AppShell>
               <ConsumptionReportPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/cash-expenses"
+          element={
+            <AppShell>
+              <CashAndExpensesPage />
             </AppShell>
           }
         />
