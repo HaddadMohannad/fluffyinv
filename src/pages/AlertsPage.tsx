@@ -77,12 +77,14 @@ export function AlertsPage() {
     if (type === "hospitality") return t.alertHospitalityLabel;
     if (type === "waste") return t.alertWasteLabel;
     if (type === "stocktake") return t.alertStocktakeLabel;
+    if (type === "low_stock") return t.alertLowStockLabel;
     return type;
   };
 
   const alertColor = (type: string) => {
     if (type === "hospitality") return "border-amber-400 bg-amber-50 dark:border-amber-700 dark:bg-amber-950";
     if (type === "waste") return "border-red-400 bg-red-50 dark:border-red-700 dark:bg-red-950";
+    if (type === "low_stock") return "border-blue-400 bg-blue-50 dark:border-blue-700 dark:bg-blue-950";
     return "border-orange-400 bg-orange-50 dark:border-orange-700 dark:bg-orange-950";
   };
 
@@ -93,6 +95,10 @@ export function AlertsPage() {
     }
     if (alert.alert_type === "waste") {
       return `${alert.metric_value.toFixed(2)} JOD (${t.wasteThresholdLabel}: ${alert.threshold_value.toFixed(2)} JOD)`;
+    }
+    if (alert.alert_type === "low_stock") {
+      const productId = alert.detail?.product_id as string | undefined;
+      return `${productId ? productName(productId) : ""} — ${alert.metric_value} / ${alert.threshold_value}`;
     }
     const productId = alert.detail?.product_id as string | undefined;
     return `${productId ? productName(productId) : ""} — ${alert.metric_value.toFixed(2)} JOD (${alert.threshold_value.toFixed(2)} JOD)`;

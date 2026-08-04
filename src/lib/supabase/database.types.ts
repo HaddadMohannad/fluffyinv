@@ -531,6 +531,7 @@ export type Database = {
           is_combo: boolean;
           name_ar: string;
           name_en: string;
+          reorder_threshold: number | null;
           selling_price: number | null;
           type: Database["public"]["Enums"]["product_type"];
           unit: Database["public"]["Enums"]["product_unit"];
@@ -545,6 +546,7 @@ export type Database = {
           is_combo?: boolean;
           name_ar: string;
           name_en: string;
+          reorder_threshold?: number | null;
           selling_price?: number | null;
           type: Database["public"]["Enums"]["product_type"];
           unit: Database["public"]["Enums"]["product_unit"];
@@ -559,6 +561,7 @@ export type Database = {
           is_combo?: boolean;
           name_ar?: string;
           name_en?: string;
+          reorder_threshold?: number | null;
           selling_price?: number | null;
           type?: Database["public"]["Enums"]["product_type"];
           unit?: Database["public"]["Enums"]["product_unit"];

@@ -19,6 +19,7 @@ import { DailyClosingPage } from "@/pages/DailyClosingPage";
 import { AlertsPage } from "@/pages/AlertsPage";
 import { SuppliersPage } from "@/pages/SuppliersPage";
 import { AccountantDashboardPage } from "@/pages/AccountantDashboardPage";
+import { ConsumptionReportPage } from "@/pages/ConsumptionReportPage";
 
 export function App() {
   return (
@@ -151,6 +152,14 @@ export function App() {
           element={
             <AppShell>
               <AccountantDashboardPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/consumption"
+          element={
+            <AppShell>
+              <ConsumptionReportPage />
             </AppShell>
           }
         />
