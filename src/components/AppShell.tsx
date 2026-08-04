@@ -12,6 +12,7 @@ import {
   Factory,
   CalendarCheck,
   Bell,
+  Building,
   Building2,
   Calculator,
   TrendingDown,
@@ -126,6 +127,12 @@ const NAV_ITEMS: NavItem[] = [
     labelKey: "hospitality",
     icon: Heart,
     roles: ["admin", "branch_manager"],
+  },
+  {
+    href: "/branches",
+    labelKey: "branches",
+    icon: Building,
+    roles: ["admin"],
   },
   {
     href: "/waste",

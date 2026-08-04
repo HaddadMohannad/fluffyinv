@@ -12,6 +12,7 @@ import { PurchasePage } from "@/pages/PurchasePage";
 import { TransferPage } from "@/pages/TransferPage";
 import { StocktakePage } from "@/pages/StocktakePage";
 import { HospitalityPage } from "@/pages/HospitalityPage";
+import { BranchManagementPage } from "@/pages/BranchManagementPage";
 import { WastePage } from "@/pages/WastePage";
 import { LookupListsPage } from "@/pages/LookupListsPage";
 import { InventoryPage } from "@/pages/InventoryPage";
@@ -92,6 +93,14 @@ export function App() {
           element={
             <AppShell title={t.hospitalityTitle}>
               <HospitalityPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/branches"
+          element={
+            <AppShell title={t.branchesTitle}>
+              <BranchManagementPage />
             </AppShell>
           }
         />
