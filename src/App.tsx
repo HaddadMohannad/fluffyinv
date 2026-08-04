@@ -23,6 +23,7 @@ import { SuppliersPage } from "@/pages/SuppliersPage";
 import { AccountantDashboardPage } from "@/pages/AccountantDashboardPage";
 import { ConsumptionReportPage } from "@/pages/ConsumptionReportPage";
 import { CashAndExpensesPage } from "@/pages/CashAndExpensesPage";
+import { ProductAliasesPage } from "@/pages/ProductAliasesPage";
 
 export function App() {
   const { t } = useLocale();
@@ -181,6 +182,14 @@ export function App() {
           element={
             <AppShell title={t.cashAndExpensesTitle}>
               <CashAndExpensesPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/unmatched-items"
+          element={
+            <AppShell title={t.unmatchedItemsTitle}>
+              <ProductAliasesPage />
             </AppShell>
           }
         />
