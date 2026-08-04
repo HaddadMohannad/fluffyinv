@@ -284,6 +284,7 @@ export const dictionary = {
     employeeNameLabel: "Name",
     saveEmployee: "Save employee",
     employeeSaved: "Employee saved.",
+    moreNavLabel: "More",
   },
   ar: {
     appName: "فلافي - المخزون",
@@ -567,6 +568,7 @@ export const dictionary = {
     employeeNameLabel: "الاسم",
     saveEmployee: "حفظ الموظف",
     employeeSaved: "تم حفظ الموظف.",
+    moreNavLabel: "المزيد",
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 
