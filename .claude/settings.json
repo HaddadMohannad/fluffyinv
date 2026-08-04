@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint)",
+      "Bash(npm run build)",
+      "mcp__6a395d2c-7a15-4554-9461-7d531042d68a__get_issue",
+      "mcp__6a395d2c-7a15-4554-9461-7d531042d68a__list_issues",
+      "mcp__6a395d2c-7a15-4554-9461-7d531042d68a__list_teams",
+      "mcp__b70ed04e-23a0-41c0-8d45-3a57a9569c26__get_advisors",
+      "mcp__github__actions_list",
+      "mcp__github__pull_request_read"
+    ]
+  }
+}
