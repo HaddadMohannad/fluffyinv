@@ -16,6 +16,7 @@ import { LookupListsPage } from "@/pages/LookupListsPage";
 import { InventoryPage } from "@/pages/InventoryPage";
 import { ProductionPage } from "@/pages/ProductionPage";
 import { DailyClosingPage } from "@/pages/DailyClosingPage";
+import { AlertsPage } from "@/pages/AlertsPage";
 
 export function App() {
   return (
@@ -124,6 +125,14 @@ export function App() {
           element={
             <AppShell>
               <DailyClosingPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/alerts"
+          element={
+            <AppShell>
+              <AlertsPage />
             </AppShell>
           }
         />
