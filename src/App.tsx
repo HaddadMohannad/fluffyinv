@@ -18,6 +18,7 @@ import { ProductionPage } from "@/pages/ProductionPage";
 import { DailyClosingPage } from "@/pages/DailyClosingPage";
 import { AlertsPage } from "@/pages/AlertsPage";
 import { SuppliersPage } from "@/pages/SuppliersPage";
+import { AccountantDashboardPage } from "@/pages/AccountantDashboardPage";
 
 export function App() {
   return (
@@ -142,6 +143,14 @@ export function App() {
           element={
             <AppShell>
               <SuppliersPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/accountant"
+          element={
+            <AppShell>
+              <AccountantDashboardPage />
             </AppShell>
           }
         />
