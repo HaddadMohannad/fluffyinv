@@ -1,9 +1,19 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { CalendarDays, Trash2, Wallet } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
 import { useActiveLocation } from "@/lib/location/LocationContext";
 import { supabase } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
+import { StatCard } from "@/components/StatCard";
+import { AddWasteModal } from "@/components/quick-actions/AddWasteModal";
+
+function startOfDayIso(daysAgo: number) {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - daysAgo);
+  return d.toISOString();
+}
 
 export function WastePage() {
   const { profile } = useAuth();
@@ -14,17 +24,13 @@ export function WastePage() {
     profile?.role === "admin" || profile?.role === "branch_manager";
 
   const [products, setProducts] = useState<Tables<"products">[]>([]);
-  const [productQuery, setProductQuery] = useState("");
-  const [productId, setProductId] = useState("");
-  const [qty, setQty] = useState("");
   const [reasons, setReasons] = useState<Tables<"lookup_values">[]>([]);
-  const [reason, setReason] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
   const [recent, setRecent] = useState<Tables<"waste_records">[]>([]);
+  const [wasteToday, setWasteToday] = useState(0);
+  const [wasteThisWeek, setWasteThisWeek] = useState(0);
+  const [wasteAllTime, setWasteAllTime] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   const reasonLabel = useMemo(() => {
     const map = new Map(
@@ -32,6 +38,13 @@ export function WastePage() {
     );
     return (code: string) => map.get(code) ?? code;
   }, [reasons, locale]);
+
+  const productName = useMemo(() => {
+    const map = new Map(
+      products.map((p) => [p.id, locale === "ar" ? p.name_ar : p.name_en])
+    );
+    return (id: string) => map.get(id) ?? id;
+  }, [products, locale]);
 
   useEffect(() => {
     if (!canWrite) return;
@@ -47,17 +60,16 @@ export function WastePage() {
       .eq("list_key", "waste_reason")
       .eq("active", true)
       .order("sort_order")
-      .then(({ data }) => {
-        const rows = data ?? [];
-        setReasons(rows);
-        setReason((current) => current || (rows.length > 0 ? rows[0].code : ""));
-      });
+      .then(({ data }) => setReasons(data ?? []));
   }, [canWrite]);
 
   useEffect(() => {
     if (!locationId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- clearing derived list when location is unset
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clearing derived state when location is unset
       setRecent([]);
+      setWasteToday(0);
+      setWasteThisWeek(0);
+      setWasteAllTime(0);
       return;
     }
     supabase
@@ -67,24 +79,33 @@ export function WastePage() {
       .order("created_at", { ascending: false })
       .limit(20)
       .then(({ data }) => setRecent(data ?? []));
+
+    supabase
+      .from("waste_records")
+      .select("value_lost")
+      .eq("location_id", locationId)
+      .gte("created_at", startOfDayIso(0))
+      .then(({ data }) => {
+        setWasteToday((data ?? []).reduce((sum, r) => sum + r.value_lost, 0));
+      });
+    supabase
+      .from("waste_records")
+      .select("value_lost")
+      .eq("location_id", locationId)
+      .gte("created_at", startOfDayIso(6))
+      .then(({ data }) => {
+        setWasteThisWeek(
+          (data ?? []).reduce((sum, r) => sum + r.value_lost, 0)
+        );
+      });
+    supabase
+      .from("waste_records")
+      .select("value_lost")
+      .eq("location_id", locationId)
+      .then(({ data }) => {
+        setWasteAllTime((data ?? []).reduce((sum, r) => sum + r.value_lost, 0));
+      });
   }, [locationId, refreshKey]);
-
-  const productName = useMemo(() => {
-    const map = new Map(products.map((p) => [p.id, p.name_en]));
-    return (id: string) => map.get(id) ?? id;
-  }, [products]);
-
-  const filteredProducts = useMemo(() => {
-    const q = productQuery.trim().toLowerCase();
-    if (!q) return products.slice(0, 20);
-    return products
-      .filter(
-        (p) =>
-          p.name_en.toLowerCase().includes(q) ||
-          p.name_ar.includes(productQuery)
-      )
-      .slice(0, 20);
-  }, [products, productQuery]);
 
   if (!canWrite) {
     return (
@@ -94,128 +115,43 @@ export function WastePage() {
     );
   }
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError(null);
-    setMessage(null);
-
-    if (!productId) {
-      setError(t.selectProductFirst);
-      return;
-    }
-
-    const qtyNum = Number(qty);
-    if (!Number.isFinite(qtyNum) || qtyNum <= 0) {
-      setError(t.invalidQuantity);
-      return;
-    }
-
-    setSaving(true);
-    const { data, error: rpcError } = await supabase.rpc("record_waste", {
-      p_location_id: locationId,
-      p_product_id: productId,
-      p_qty: qtyNum,
-      p_reason: reason,
-    });
-    setSaving(false);
-
-    if (rpcError) {
-      console.error("Record waste failed:", rpcError);
-      setError(rpcError.message);
-      return;
-    }
-
-    const result = data?.[0];
-    setMessage(
-      result
-        ? `${t.entrySaved} ${t.valueLostLabel}: ${result.value_lost.toFixed(3)}`
-        : t.entrySaved
-    );
-    setProductId("");
-    setProductQuery("");
-    setQty("");
-    setReason(reasons.length > 0 ? reasons[0].code : "");
+  function handleSaved() {
     setRefreshKey((k) => k + 1);
   }
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
-      <h1 className="text-fluffy-dark text-2xl font-semibold dark:text-zinc-50">
-        {t.wasteTitle}
-      </h1>
-
-      <form onSubmit={handleSubmit} className="flex max-w-md flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm">
-          {t.product}
-          <input
-            type="text"
-            value={productId ? productName(productId) : productQuery}
-            onChange={(e) => {
-              setProductId("");
-              setProductQuery(e.target.value);
-            }}
-            placeholder={t.searchProduct}
-            className="h-11 rounded-md border border-zinc-300 px-3 dark:border-zinc-700 dark:bg-zinc-900"
-          />
-          {!productId && productQuery && (
-            <ul className="max-h-48 overflow-y-auto rounded-md border border-zinc-200 dark:border-zinc-800">
-              {filteredProducts.map((p) => (
-                <li key={p.id}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setProductId(p.id);
-                      setProductQuery("");
-                    }}
-                    className="flex h-11 w-full items-center px-3 text-start text-sm hover:bg-zinc-100 dark:hover:bg-zinc-900"
-                  >
-                    {p.name_en}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </label>
-
-        <label className="flex flex-col gap-1 text-sm">
-          {t.quantity}
-          <input
-            type="number"
-            inputMode="decimal"
-            min="0"
-            step="any"
-            value={qty}
-            onChange={(e) => setQty(e.target.value)}
-            className="h-11 rounded-md border border-zinc-300 px-3 dark:border-zinc-700 dark:bg-zinc-900"
-          />
-        </label>
-
-        <label className="flex flex-col gap-1 text-sm">
-          {t.wasteReasonLabel}
-          <select
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            className="h-11 rounded-md border border-zinc-300 px-3 dark:border-zinc-700 dark:bg-zinc-900"
-          >
-            {reasons.map((r) => (
-              <option key={r.code} value={r.code}>
-                {reasonLabel(r.code)}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        {message && <p className="text-sm text-green-600">{message}</p>}
-
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-fluffy-dark text-2xl font-semibold dark:text-zinc-50">
+          {t.wasteTitle}
+        </h1>
         <button
-          type="submit"
-          disabled={saving || !locationId || !productId || !reason}
-          className="bg-fluffy-orange h-11 rounded-md text-base font-medium text-white disabled:opacity-60"
+          type="button"
+          disabled={!locationId}
+          onClick={() => setShowAddModal(true)}
+          className="h-9 rounded-md bg-red-600 px-4 text-sm font-medium text-white disabled:opacity-60"
         >
-          {saving ? t.submitting : t.submitEntry}
+          {t.addWasteAction}
         </button>
-      </form>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatCard
+          label={t.todaysWasteLabel}
+          value={`${wasteToday.toFixed(2)} JOD`}
+          icon={Trash2}
+        />
+        <StatCard
+          label={t.totalWasteWeekLabel}
+          value={`${wasteThisWeek.toFixed(2)} JOD`}
+          icon={CalendarDays}
+        />
+        <StatCard
+          label={t.totalValueLostLabel}
+          value={`${wasteAllTime.toFixed(2)} JOD`}
+          icon={Wallet}
+        />
+      </div>
 
       {locationId && (
         <section>
@@ -246,6 +182,14 @@ export function WastePage() {
             </table>
           </div>
         </section>
+      )}
+
+      {showAddModal && (
+        <AddWasteModal
+          locationId={locationId}
+          onClose={() => setShowAddModal(false)}
+          onSaved={handleSaved}
+        />
       )}
     </div>
   );

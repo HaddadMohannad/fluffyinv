@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Package, Plus } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
 import { useActiveLocation } from "@/lib/location/LocationContext";
@@ -7,8 +8,15 @@ import type { Tables } from "@/lib/supabase/database.types";
 import { WasteQuickModal } from "@/components/quick-actions/WasteQuickModal";
 import { HospitalityQuickModal } from "@/components/quick-actions/HospitalityQuickModal";
 import { TransferQuickModal } from "@/components/quick-actions/TransferQuickModal";
+import { AddWasteModal } from "@/components/quick-actions/AddWasteModal";
+import { AddHospitalityModal } from "@/components/quick-actions/AddHospitalityModal";
+import { TransferStockModal } from "@/components/quick-actions/TransferStockModal";
+import { AddProductModal } from "@/components/quick-actions/AddProductModal";
+import { Pill } from "@/components/Pill";
+import { categoryTone } from "@/lib/pillColors";
 
 type QuickAction = "waste" | "hospitality" | "transfer";
+type GlobalAction = "waste" | "hospitality" | "transfer" | "product";
 
 export function InventoryPage() {
   const { profile } = useAuth();
@@ -21,7 +29,7 @@ export function InventoryPage() {
     profile?.role === "warehouse_staff";
   const canWasteOrHospitality =
     profile?.role === "admin" || profile?.role === "branch_manager";
-  const canEditReorderThreshold = profile?.role === "admin";
+  const isAdmin = profile?.role === "admin";
 
   const [products, setProducts] = useState<Tables<"products">[]>([]);
   const [stock, setStock] = useState<Record<string, number>>({});
@@ -30,9 +38,11 @@ export function InventoryPage() {
     action: QuickAction;
     product: Tables<"products">;
   } | null>(null);
+  const [activeGlobalModal, setActiveGlobalModal] =
+    useState<GlobalAction | null>(null);
   const [reorderEdits, setReorderEdits] = useState<Record<string, string>>({});
 
-  useEffect(() => {
+  const fetchProducts = useCallback(() => {
     if (!canView) return;
     supabase
       .from("products")
@@ -41,6 +51,10 @@ export function InventoryPage() {
       .order("name_en")
       .then(({ data }) => setProducts(data ?? []));
   }, [canView]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   useEffect(() => {
     if (!locationId) {
@@ -117,9 +131,48 @@ export function InventoryPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
-      <h1 className="text-fluffy-dark text-2xl font-semibold dark:text-zinc-50">
-        {t.inventoryTitle}
-      </h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-fluffy-dark text-2xl font-semibold dark:text-zinc-50">
+          {t.inventoryTitle}
+        </h1>
+        <div className="flex flex-wrap gap-2">
+          {canWasteOrHospitality && (
+            <button
+              type="button"
+              onClick={() => setActiveGlobalModal("waste")}
+              className="h-9 rounded-md border border-zinc-300 px-3 text-sm font-medium dark:border-zinc-700"
+            >
+              {t.addWasteAction}
+            </button>
+          )}
+          {canWasteOrHospitality && (
+            <button
+              type="button"
+              onClick={() => setActiveGlobalModal("hospitality")}
+              className="h-9 rounded-md border border-zinc-300 px-3 text-sm font-medium dark:border-zinc-700"
+            >
+              {t.addHospitalityAction}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setActiveGlobalModal("transfer")}
+            className="h-9 rounded-md border border-zinc-300 px-3 text-sm font-medium dark:border-zinc-700"
+          >
+            {t.transferStockAction}
+          </button>
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={() => setActiveGlobalModal("product")}
+              className="bg-fluffy-orange flex h-9 items-center gap-1 rounded-md px-3 text-sm font-medium text-white"
+            >
+              <Plus className="h-4 w-4" />
+              {t.addProductAction}
+            </button>
+          )}
+        </div>
+      </div>
 
       {!locationId ? (
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
@@ -135,90 +188,108 @@ export function InventoryPage() {
                 <th className="p-2 text-end">{t.quantity}</th>
                 <th className="p-2 text-end">{t.unitCost}</th>
                 <th className="p-2 text-end">{t.totalValueColumn}</th>
-                {canEditReorderThreshold && (
+                {isAdmin && (
                   <th className="p-2 text-end">{t.reorderThresholdColumn}</th>
                 )}
                 <th className="p-2" />
               </tr>
             </thead>
             <tbody>
-              {products.map((product) => {
-                const qty = stock[product.id] ?? 0;
-                const totalValue = qty * (product.avg_cost ?? 0);
-                return (
-                  <tr
-                    key={product.id}
-                    className="border-t border-zinc-100 dark:border-zinc-800"
+              {products.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={isAdmin ? 7 : 6}
+                    className="p-6 text-center text-zinc-500 dark:text-zinc-400"
                   >
-                    <td className="p-2">
-                      {locale === "ar" ? product.name_ar : product.name_en}
-                    </td>
-                    <td className="p-2">{categoryLabel(product.type)}</td>
-                    <td className="p-2 text-end">{qty}</td>
-                    <td className="p-2 text-end">
-                      {(product.avg_cost ?? 0).toFixed(3)}
-                    </td>
-                    <td className="p-2 text-end">{totalValue.toFixed(3)}</td>
-                    {canEditReorderThreshold && (
-                      <td className="p-2 text-end">
-                        <input
-                          type="number"
-                          inputMode="decimal"
-                          min="0"
-                          step="any"
-                          value={reorderValue(product)}
-                          onChange={(e) =>
-                            setReorderEdits((prev) => ({
-                              ...prev,
-                              [product.id]: e.target.value,
-                            }))
-                          }
-                          onBlur={() => handleSaveReorderThreshold(product)}
-                          className="h-8 w-20 rounded-md border border-zinc-300 px-2 text-end dark:border-zinc-700 dark:bg-zinc-900"
-                        />
+                    <div className="flex flex-col items-center gap-2">
+                      <Package className="h-6 w-6" />
+                      {t.noInventoryItems}
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                products.map((product) => {
+                  const qty = stock[product.id] ?? 0;
+                  const totalValue = qty * (product.avg_cost ?? 0);
+                  return (
+                    <tr
+                      key={product.id}
+                      className="border-t border-zinc-100 dark:border-zinc-800"
+                    >
+                      <td className="p-2">
+                        {locale === "ar" ? product.name_ar : product.name_en}
                       </td>
-                    )}
-                    <td className="p-2 text-end">
-                      <div className="flex justify-end gap-1">
-                        {canWasteOrHospitality && (
+                      <td className="p-2">
+                        <Pill tone={categoryTone(product.type)}>
+                          {categoryLabel(product.type)}
+                        </Pill>
+                      </td>
+                      <td className="p-2 text-end">{qty}</td>
+                      <td className="p-2 text-end">
+                        {(product.avg_cost ?? 0).toFixed(3)}
+                      </td>
+                      <td className="p-2 text-end">{totalValue.toFixed(3)}</td>
+                      {isAdmin && (
+                        <td className="p-2 text-end">
+                          <input
+                            type="number"
+                            inputMode="decimal"
+                            min="0"
+                            step="any"
+                            value={reorderValue(product)}
+                            onChange={(e) =>
+                              setReorderEdits((prev) => ({
+                                ...prev,
+                                [product.id]: e.target.value,
+                              }))
+                            }
+                            onBlur={() => handleSaveReorderThreshold(product)}
+                            className="h-8 w-20 rounded-md border border-zinc-300 px-2 text-end dark:border-zinc-700 dark:bg-zinc-900"
+                          />
+                        </td>
+                      )}
+                      <td className="p-2 text-end">
+                        <div className="flex justify-end gap-1">
+                          {canWasteOrHospitality && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setActiveModal({ action: "waste", product })
+                              }
+                              className="h-8 rounded-md border border-zinc-300 px-2 text-xs font-medium dark:border-zinc-700"
+                            >
+                              {t.addWasteAction}
+                            </button>
+                          )}
+                          {canWasteOrHospitality && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setActiveModal({
+                                  action: "hospitality",
+                                  product,
+                                })
+                              }
+                              className="h-8 rounded-md border border-zinc-300 px-2 text-xs font-medium dark:border-zinc-700"
+                            >
+                              {t.addHospitalityAction}
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={() =>
-                              setActiveModal({ action: "waste", product })
+                              setActiveModal({ action: "transfer", product })
                             }
                             className="h-8 rounded-md border border-zinc-300 px-2 text-xs font-medium dark:border-zinc-700"
                           >
-                            {t.addWasteAction}
+                            {t.transferAction}
                           </button>
-                        )}
-                        {canWasteOrHospitality && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setActiveModal({
-                                action: "hospitality",
-                                product,
-                              })
-                            }
-                            className="h-8 rounded-md border border-zinc-300 px-2 text-xs font-medium dark:border-zinc-700"
-                          >
-                            {t.addHospitalityAction}
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setActiveModal({ action: "transfer", product })
-                          }
-                          className="h-8 rounded-md border border-zinc-300 px-2 text-xs font-medium dark:border-zinc-700"
-                        >
-                          {t.transferAction}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
@@ -246,6 +317,34 @@ export function InventoryPage() {
           product={activeModal.product}
           onClose={closeModal}
           onSaved={handleSaved}
+        />
+      )}
+
+      {activeGlobalModal === "waste" && (
+        <AddWasteModal
+          locationId={locationId}
+          onClose={() => setActiveGlobalModal(null)}
+          onSaved={handleSaved}
+        />
+      )}
+      {activeGlobalModal === "hospitality" && (
+        <AddHospitalityModal
+          locationId={locationId}
+          onClose={() => setActiveGlobalModal(null)}
+          onSaved={handleSaved}
+        />
+      )}
+      {activeGlobalModal === "transfer" && (
+        <TransferStockModal
+          locationId={locationId}
+          onClose={() => setActiveGlobalModal(null)}
+          onSaved={handleSaved}
+        />
+      )}
+      {activeGlobalModal === "product" && (
+        <AddProductModal
+          onClose={() => setActiveGlobalModal(null)}
+          onSaved={fetchProducts}
         />
       )}
     </div>
