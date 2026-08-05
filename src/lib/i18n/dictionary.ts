@@ -348,6 +348,17 @@ export const dictionary = {
     aliasAppliedPrefix: "Mapped — backfilled",
     aliasAppliedSuffix: "existing rows.",
     unmatchedItemsNavLabel: "Unmatched Items",
+    branchComparison: "Branch Comparison",
+    branchComparisonTitle: "Branch Comparison",
+    branchColumn: "Branch",
+    wasteColumn: "Waste",
+    wastePctColumn: "Waste %",
+    hospitalityColumn: "Hospitality",
+    hospitalityPctColumn: "Hospitality %",
+    currentStockValueColumn: "Current Stock Value",
+    stockTurnoverNote:
+      "Stock turnover isn't shown here — sales don't yet post stock-deduction entries to the ledger, so a turnover ratio can't be computed accurately. Current stock value is shown instead.",
+    totalsRowLabel: "All Branches",
   },
   ar: {
     appName: "فلافي - المخزون",
@@ -695,6 +706,17 @@ export const dictionary = {
     aliasAppliedPrefix: "تم الربط — تم تحديث",
     aliasAppliedSuffix: "سجل موجود.",
     unmatchedItemsNavLabel: "عناصر غير مطابقة",
+    branchComparison: "مقارنة الفروع",
+    branchComparisonTitle: "مقارنة الفروع",
+    branchColumn: "الفرع",
+    wasteColumn: "الهدر",
+    wastePctColumn: "نسبة الهدر",
+    hospitalityColumn: "الضيافة",
+    hospitalityPctColumn: "نسبة الضيافة",
+    currentStockValueColumn: "قيمة المخزون الحالية",
+    stockTurnoverNote:
+      "لا يظهر معدل دوران المخزون هنا — المبيعات لا تُسجّل بعد حركات خصم من المخزون، لذا لا يمكن حساب هذا المعدل بدقة. تُعرض قيمة المخزون الحالية بدلاً من ذلك.",
+    totalsRowLabel: "جميع الفروع",
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 

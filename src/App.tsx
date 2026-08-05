@@ -24,6 +24,7 @@ import { AccountantDashboardPage } from "@/pages/AccountantDashboardPage";
 import { ConsumptionReportPage } from "@/pages/ConsumptionReportPage";
 import { CashAndExpensesPage } from "@/pages/CashAndExpensesPage";
 import { ProductAliasesPage } from "@/pages/ProductAliasesPage";
+import { BranchComparisonPage } from "@/pages/BranchComparisonPage";
 
 export function App() {
   const { t } = useLocale();
@@ -190,6 +191,14 @@ export function App() {
           element={
             <AppShell title={t.unmatchedItemsTitle}>
               <ProductAliasesPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/branch-comparison"
+          element={
+            <AppShell title={t.branchComparisonTitle}>
+              <BranchComparisonPage />
             </AppShell>
           }
         />
