@@ -348,6 +348,21 @@ export const dictionary = {
     aliasAppliedPrefix: "Mapped — backfilled",
     aliasAppliedSuffix: "existing rows.",
     unmatchedItemsNavLabel: "Unmatched Items",
+    settings: "Settings",
+    settingsTitle: "Settings",
+    dangerZoneTitle: "Danger Zone",
+    dangerZoneDescription:
+      "Permanently delete all sales, inventory, purchasing, and financial records for every branch. User accounts, branches, the product catalog, and lookup lists are kept so the app stays usable afterward.",
+    deleteAllDataButton: "Delete All Business Data",
+    deleteAllDataConfirmTitle: "This cannot be undone",
+    deleteAllDataConfirmBody:
+      "This will permanently delete every sales order, stock movement, purchase, transfer, production batch, waste/hospitality record, stocktake, cash count, expense, and supplier invoice. Type the phrase below to confirm.",
+    deleteAllDataConfirmPhrase: "DELETE ALL DATA",
+    confirmPhraseLabel: "Type the phrase above to confirm",
+    confirmPhraseMismatch: "Type the phrase exactly as shown to enable deletion.",
+    deletingAllData: "Deleting…",
+    deleteAllDataSuccess: "All business data has been deleted.",
+    cancelButton: "Cancel",
   },
   ar: {
     appName: "فلافي - المخزون",
@@ -695,6 +710,21 @@ export const dictionary = {
     aliasAppliedPrefix: "تم الربط — تم تحديث",
     aliasAppliedSuffix: "سجل موجود.",
     unmatchedItemsNavLabel: "عناصر غير مطابقة",
+    settings: "الإعدادات",
+    settingsTitle: "الإعدادات",
+    dangerZoneTitle: "منطقة الخطر",
+    dangerZoneDescription:
+      "حذف جميع سجلات المبيعات والمخزون والمشتريات والسجلات المالية لجميع الفروع بشكل نهائي. يتم الاحتفاظ بحسابات المستخدمين والفروع وكتالوج المنتجات وقوائم الخيارات ليبقى التطبيق قابلاً للاستخدام بعد ذلك.",
+    deleteAllDataButton: "حذف جميع بيانات النشاط التجاري",
+    deleteAllDataConfirmTitle: "لا يمكن التراجع عن هذا الإجراء",
+    deleteAllDataConfirmBody:
+      "سيؤدي هذا إلى حذف كل طلب مبيعات، وحركة مخزون، وعملية شراء، وتحويل، ودفعة إنتاج، وسجل هدر/ضيافة، وجرد، وعد نقدي، ومصروف، وفاتورة مورد بشكل نهائي. اكتب العبارة أدناه للتأكيد.",
+    deleteAllDataConfirmPhrase: "DELETE ALL DATA",
+    confirmPhraseLabel: "اكتب العبارة أعلاه للتأكيد",
+    confirmPhraseMismatch: "اكتب العبارة تمامًا كما هو موضح لتفعيل الحذف.",
+    deletingAllData: "جارٍ الحذف…",
+    deleteAllDataSuccess: "تم حذف جميع بيانات النشاط التجاري.",
+    cancelButton: "إلغاء",
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 

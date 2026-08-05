@@ -21,6 +21,7 @@ import {
   Heart,
   Trash2,
   Settings2,
+  Settings,
   ChefHat,
   ChevronDown,
   MapPin,
@@ -151,6 +152,12 @@ const NAV_ITEMS: NavItem[] = [
     href: "/unmatched-items",
     labelKey: "unmatchedItemsNavLabel",
     icon: PackageSearch,
+    roles: ["admin"],
+  },
+  {
+    href: "/settings",
+    labelKey: "settings",
+    icon: Settings,
     roles: ["admin"],
   },
 ];
