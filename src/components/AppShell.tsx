@@ -21,6 +21,7 @@ import {
   Heart,
   Trash2,
   Settings2,
+  BarChart3,
   ChefHat,
   ChevronDown,
   MapPin,
@@ -103,6 +104,12 @@ const NAV_ITEMS: NavItem[] = [
     href: "/accountant",
     labelKey: "accountantDashboard",
     icon: Calculator,
+    roles: ["admin", "accountant"],
+  },
+  {
+    href: "/branch-comparison",
+    labelKey: "branchComparison",
+    icon: BarChart3,
     roles: ["admin", "accountant"],
   },
   {
