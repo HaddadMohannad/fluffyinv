@@ -227,17 +227,19 @@ export function AppShell({
 
         <div className="flex flex-1 flex-col">
           <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-zinc-200 bg-white px-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <h1 className="text-fluffy-dark truncate text-base font-semibold dark:text-zinc-50">
-              {activeLocationName ? `${activeLocationName} — ` : ""}
+            <h1 className="text-fluffy-dark min-w-0 truncate text-base font-semibold dark:text-zinc-50">
+              <span className="hidden sm:inline">
+                {activeLocationName ? `${activeLocationName} — ` : ""}
+              </span>
               {title ?? t.appName}
             </h1>
             <div className="flex shrink-0 items-center gap-2">
               {profile &&
                 (isLocationLocked ? (
                   location && (
-                    <span className="flex items-center gap-1 rounded-full border border-zinc-300 px-3 py-1.5 text-sm font-medium dark:border-zinc-700">
-                      <MapPin className="h-3.5 w-3.5" />
-                      {activeLocationName}
+                    <span className="flex max-w-[7rem] items-center gap-1 rounded-full border border-zinc-300 px-3 py-1.5 text-sm font-medium sm:max-w-none dark:border-zinc-700">
+                      <MapPin className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">{activeLocationName}</span>
                     </span>
                   )
                 ) : (
@@ -246,7 +248,7 @@ export function AppShell({
                     <select
                       value={locationId}
                       onChange={(e) => setSelectedLocationId(e.target.value)}
-                      className="h-9 appearance-none rounded-full border border-zinc-300 bg-transparent ps-8 pe-7 text-sm font-medium dark:border-zinc-700"
+                      className="h-9 max-w-[7rem] appearance-none truncate rounded-full border border-zinc-300 bg-transparent ps-8 pe-7 text-sm font-medium sm:max-w-none dark:border-zinc-700"
                     >
                       {locations.map((l) => (
                         <option key={l.id} value={l.id}>
