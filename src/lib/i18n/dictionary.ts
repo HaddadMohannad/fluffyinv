@@ -336,6 +336,18 @@ export const dictionary = {
     totalUsageWeekLabel: "Total Usage This Week",
     totalValueLabel: "Total Value",
     noRecentBatches: "No production batches yet.",
+    lineItemsMatchedLabel: "Items matched",
+    lineItemsUnmatchedLabel: "Items unmatched",
+    unmatchedItemsTitle: "Unmatched Sale Items",
+    unmatchedItemsSubtitle:
+      "Items from imported sales that couldn't be matched to a product. Map each one once -- it applies to every existing and future order.",
+    noUnmatchedItems: "No unmatched sale items.",
+    occurrencesColumn: "Occurrences",
+    totalQtyColumn: "Total Qty",
+    mapToProductAction: "Map to product",
+    aliasAppliedPrefix: "Mapped — backfilled",
+    aliasAppliedSuffix: "existing rows.",
+    unmatchedItemsNavLabel: "Unmatched Items",
   },
   ar: {
     appName: "فلافي - المخزون",
@@ -671,6 +683,18 @@ export const dictionary = {
     totalUsageWeekLabel: "إجمالي الاستخدام هذا الأسبوع",
     totalValueLabel: "القيمة الإجمالية",
     noRecentBatches: "لا توجد دفعات إنتاج بعد.",
+    lineItemsMatchedLabel: "عناصر مطابقة",
+    lineItemsUnmatchedLabel: "عناصر غير مطابقة",
+    unmatchedItemsTitle: "عناصر مبيعات غير مطابقة",
+    unmatchedItemsSubtitle:
+      "عناصر من المبيعات المستوردة لم تتم مطابقتها مع منتج. اربط كل عنصر مرة واحدة — سيُطبَّق على كل الطلبات الحالية والمستقبلية.",
+    noUnmatchedItems: "لا توجد عناصر مبيعات غير مطابقة.",
+    occurrencesColumn: "عدد مرات التكرار",
+    totalQtyColumn: "الكمية الإجمالية",
+    mapToProductAction: "ربط بمنتج",
+    aliasAppliedPrefix: "تم الربط — تم تحديث",
+    aliasAppliedSuffix: "سجل موجود.",
+    unmatchedItemsNavLabel: "عناصر غير مطابقة",
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 

@@ -5,6 +5,13 @@ export type ParsedCsv = {
   rows: Record<string, string>[];
 };
 
+export type NormalizedOrderLine = {
+  /** Clean, matchable item name (e.g. "Fluffy Burger Meal") -- no leading
+   * quantity (kept separately in `qty`) and no combo-bundle sub-item detail. */
+  itemName: string;
+  qty: number;
+};
+
 export type NormalizedOrder = {
   externalRef: string;
   branchName: string;
@@ -12,6 +19,8 @@ export type NormalizedOrder = {
   gross: number;
   commission: number;
   net: number;
+  /** Per-item breakdown, when the source format supports it (currently Talabat only). */
+  lines?: NormalizedOrderLine[];
 };
 
 export type NormalizeResult = {

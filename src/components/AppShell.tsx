@@ -26,6 +26,7 @@ import {
   MapPin,
   LogOut,
   MoreHorizontal,
+  PackageSearch,
   X,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
@@ -144,6 +145,12 @@ const NAV_ITEMS: NavItem[] = [
     href: "/lookup-lists",
     labelKey: "lookupLists",
     icon: Settings2,
+    roles: ["admin"],
+  },
+  {
+    href: "/unmatched-items",
+    labelKey: "unmatchedItemsNavLabel",
+    icon: PackageSearch,
     roles: ["admin"],
   },
 ];

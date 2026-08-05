@@ -235,6 +235,18 @@ function DoneSummary({
         <Stat label={t.rowsResolved} value={summary.resolvedCount} />
         <Stat label={t.rowsUnresolved} value={summary.unresolvedCount} />
         <Stat label="Inserted" value={summary.insertedCount} />
+        {summary.lineMatchedCount + summary.lineUnmatchedCount > 0 && (
+          <>
+            <Stat
+              label={t.lineItemsMatchedLabel}
+              value={summary.lineMatchedCount}
+            />
+            <Stat
+              label={t.lineItemsUnmatchedLabel}
+              value={summary.lineUnmatchedCount}
+            />
+          </>
+        )}
       </dl>
       <button
         type="button"
