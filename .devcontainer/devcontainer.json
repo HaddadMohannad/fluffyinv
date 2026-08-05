@@ -7,7 +7,7 @@
     "5173": {
       "label": "Fluffy Inventory (dev)",
       "onAutoForward": "openPreview",
-      "visibility": "public"
+      "visibility": "private"
     }
   },
   "customizations": {
