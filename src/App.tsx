@@ -15,6 +15,7 @@ import { HospitalityPage } from "@/pages/HospitalityPage";
 import { BranchManagementPage } from "@/pages/BranchManagementPage";
 import { WastePage } from "@/pages/WastePage";
 import { LookupListsPage } from "@/pages/LookupListsPage";
+import { AuditCriteriaPage } from "@/pages/AuditCriteriaPage";
 import { InventoryPage } from "@/pages/InventoryPage";
 import { ProductionPage } from "@/pages/ProductionPage";
 import { DailyClosingPage } from "@/pages/DailyClosingPage";
@@ -118,6 +119,14 @@ export function App() {
           element={
             <AppShell title={t.lookupListsTitle}>
               <LookupListsPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/audit-criteria"
+          element={
+            <AppShell title={t.auditCriteriaTitle}>
+              <AuditCriteriaPage />
             </AppShell>
           }
         />

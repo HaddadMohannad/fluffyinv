@@ -28,6 +28,7 @@ import {
   MoreHorizontal,
   PackageSearch,
   X,
+  ListChecks,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
@@ -145,6 +146,12 @@ const NAV_ITEMS: NavItem[] = [
     href: "/lookup-lists",
     labelKey: "lookupLists",
     icon: Settings2,
+    roles: ["admin"],
+  },
+  {
+    href: "/audit-criteria",
+    labelKey: "auditCriteria",
+    icon: ListChecks,
     roles: ["admin"],
   },
   {
