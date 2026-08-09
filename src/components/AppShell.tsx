@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router";
 import {
   ChefHat,
@@ -12,7 +12,8 @@ import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
 import { useActiveLocation } from "@/lib/location/LocationContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
-import { NAV_ITEMS, type NavItem } from "@/lib/navigation";
+import { NAV_ITEMS, roleDefaultHrefs, type NavItem } from "@/lib/navigation";
+import { supabase } from "@/lib/supabase/client";
 
 function initialsOf(name: string | null | undefined) {
   if (!name) return "?";
@@ -39,12 +40,34 @@ export function AppShell({
     useActiveLocation();
   const routerLocation = useLocation();
 
+  const [customModules, setCustomModules] = useState<Set<string> | null>(null);
+
+  useEffect(() => {
+    if (!profile) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clearing derived state when the profile isn't loaded yet
+      setCustomModules(null);
+      return;
+    }
+    supabase
+      .from("profile_module_grants")
+      .select("module_href")
+      .eq("profile_id", profile.id)
+      .then(({ data }) => {
+        setCustomModules(
+          data && data.length > 0
+            ? new Set(data.map((r) => r.module_href))
+            : null
+        );
+      });
+  }, [profile]);
+
   const visibleItems = NAV_ITEMS.filter((item) => {
     // Home always shows — it's where the pending-approval message lives
     // for a session with no profile yet. Everything else needs a profile.
     if (item.href === "/") return true;
     if (!profile) return false;
-    return !item.roles || item.roles.includes(profile.role);
+    const allowed = customModules ?? roleDefaultHrefs(profile.role);
+    return allowed.has(item.href);
   });
 
   const activeLocationName = isLocationLocked

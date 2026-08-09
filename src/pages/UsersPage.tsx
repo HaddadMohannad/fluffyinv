@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Pill } from "@/components/Pill";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
-import { NAV_ITEMS } from "@/lib/navigation";
+import { NAV_ITEMS, roleDefaultHrefs } from "@/lib/navigation";
 import { supabase } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
 
@@ -41,6 +41,9 @@ export function UsersPage() {
   const [locations, setLocations] = useState<Tables<"locations">[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [grants, setGrants] = useState<Tables<"audit_location_grants">[]>([]);
+  const [moduleGrants, setModuleGrants] = useState<
+    Tables<"profile_module_grants">[]
+  >([]);
   const [activity, setActivity] = useState<Tables<"v_user_activity_log">[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +78,7 @@ export function UsersPage() {
     if (!selectedId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- clearing derived state when selection is cleared
       setGrants([]);
+      setModuleGrants([]);
       setActivity([]);
       return;
     }
@@ -83,6 +87,11 @@ export function UsersPage() {
       .select("*")
       .eq("profile_id", selectedId)
       .then(({ data }) => setGrants(data ?? []));
+    supabase
+      .from("profile_module_grants")
+      .select("*")
+      .eq("profile_id", selectedId)
+      .then(({ data }) => setModuleGrants(data ?? []));
     supabase
       .from("v_user_activity_log")
       .select("*")
@@ -97,12 +106,15 @@ export function UsersPage() {
     [users, selectedId]
   );
 
-  const visibleModules = useMemo(() => {
-    if (!selectedUser) return [];
-    return NAV_ITEMS.filter(
-      (item) => !item.roles || item.roles.includes(selectedUser.role)
-    ).map((item) => t[item.labelKey]);
-  }, [selectedUser, t]);
+  const isModulesCustomized = moduleGrants.length > 0;
+
+  const effectiveModuleHrefs = useMemo(() => {
+    if (!selectedUser) return new Set<string>();
+    if (isModulesCustomized) {
+      return new Set(moduleGrants.map((g) => g.module_href));
+    }
+    return roleDefaultHrefs(selectedUser.role);
+  }, [selectedUser, moduleGrants, isModulesCustomized]);
 
   const grantedLocations = useMemo(
     () =>
@@ -193,6 +205,68 @@ export function UsersPage() {
         setError(insertError.message);
         return;
       }
+    }
+    setRefreshKey((k) => k + 1);
+  }
+
+  async function toggleModule(href: string, granted: boolean) {
+    if (!selectedUser) return;
+    setError(null);
+
+    if (!isModulesCustomized) {
+      // First customization for this user: materialize the role-default
+      // set as explicit rows, then apply this one toggle on top of it —
+      // otherwise a single insert would read as "only this module".
+      const base = roleDefaultHrefs(selectedUser.role);
+      if (granted) base.delete(href);
+      else base.add(href);
+      const rows = Array.from(base).map((module_href) => ({
+        profile_id: selectedUser.id,
+        module_href,
+      }));
+      const { error: insertError } = await supabase
+        .from("profile_module_grants")
+        .insert(rows);
+      if (insertError) {
+        setError(insertError.message);
+        return;
+      }
+      setRefreshKey((k) => k + 1);
+      return;
+    }
+
+    if (granted) {
+      const { error: deleteError } = await supabase
+        .from("profile_module_grants")
+        .delete()
+        .eq("profile_id", selectedUser.id)
+        .eq("module_href", href);
+      if (deleteError) {
+        setError(deleteError.message);
+        return;
+      }
+    } else {
+      const { error: insertError } = await supabase
+        .from("profile_module_grants")
+        .insert({ profile_id: selectedUser.id, module_href: href });
+      if (insertError) {
+        setError(insertError.message);
+        return;
+      }
+    }
+    setRefreshKey((k) => k + 1);
+  }
+
+  async function resetModulesToDefault() {
+    if (!selectedUser) return;
+    setError(null);
+    const { error: deleteError } = await supabase
+      .from("profile_module_grants")
+      .delete()
+      .eq("profile_id", selectedUser.id);
+    if (deleteError) {
+      setError(deleteError.message);
+      return;
     }
     setRefreshKey((k) => k + 1);
   }
@@ -420,15 +494,41 @@ export function UsersPage() {
               </div>
 
               <div className="flex flex-col gap-2 rounded-md border border-zinc-200 p-4 dark:border-zinc-800">
-                <h2 className="text-lg font-semibold">
-                  {t.modulesVisibleTitle}
-                </h2>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h2 className="text-lg font-semibold">
+                    {t.modulesVisibleTitle}
+                  </h2>
+                  {isModulesCustomized && (
+                    <button
+                      type="button"
+                      onClick={resetModulesToDefault}
+                      className="text-fluffy-orange text-sm font-medium"
+                    >
+                      {t.resetModulesToDefault}
+                    </button>
+                  )}
+                </div>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  {t.moduleVisibilityNote}
+                </p>
                 <div className="flex flex-wrap gap-2">
-                  {visibleModules.map((label) => (
-                    <Pill key={label} tone="zinc">
-                      {label}
-                    </Pill>
-                  ))}
+                  {NAV_ITEMS.filter((item) => item.href !== "/").map((item) => {
+                    const granted = effectiveModuleHrefs.has(item.href);
+                    return (
+                      <button
+                        key={item.href}
+                        type="button"
+                        onClick={() => toggleModule(item.href, granted)}
+                        className={`h-8 rounded-full border px-3 text-xs font-medium ${
+                          granted
+                            ? "border-fluffy-orange bg-fluffy-orange text-white"
+                            : "border-zinc-300 dark:border-zinc-700"
+                        }`}
+                      >
+                        {t[item.labelKey]}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

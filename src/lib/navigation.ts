@@ -29,17 +29,14 @@ import {
 } from "lucide-react";
 import { dictionary } from "@/lib/i18n/dictionary";
 
+export type Role =
+  "admin" | "branch_manager" | "warehouse_staff" | "accountant" | "inspector";
+
 export type NavItem = {
   href: string;
   labelKey: keyof (typeof dictionary)["en"];
   icon: LucideIcon;
-  roles?: Array<
-    | "admin"
-    | "branch_manager"
-    | "warehouse_staff"
-    | "accountant"
-    | "inspector"
-  >;
+  roles?: Role[];
 };
 
 export const NAV_ITEMS: NavItem[] = [
@@ -190,3 +187,13 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin"],
   },
 ];
+
+// Every module a role sees out of the box, before any per-user
+// customization in profile_module_grants narrows or widens it.
+export function roleDefaultHrefs(role: Role): Set<string> {
+  const hrefs = new Set<string>();
+  for (const item of NAV_ITEMS) {
+    if (!item.roles || item.roles.includes(role)) hrefs.add(item.href);
+  }
+  return hrefs;
+}
