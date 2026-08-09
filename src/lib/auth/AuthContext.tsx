@@ -20,6 +20,7 @@ type AuthState = {
     password: string,
     remember: boolean
   ) => Promise<{ error: string | null }>;
+  signInWithGoogle: () => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   requestPasswordReset: (email: string) => Promise<{ error: string | null }>;
   updatePassword: (newPassword: string) => Promise<{ error: string | null }>;
@@ -134,6 +135,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  async function signInWithGoogle() {
+    setRememberMe(true);
+
+    const redirectTo = `${window.location.origin}${import.meta.env.BASE_URL}`;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo },
+    });
+
+    if (error) {
+      console.error("signInWithGoogle error:", error);
+      return { error: error.message || "Could not start Google sign-in." };
+    }
+    return { error: null };
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
   }
@@ -171,6 +188,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         location,
         loading: sessionLoading || profileLoading,
         signIn,
+        signInWithGoogle,
         signOut,
         requestPasswordReset,
         updatePassword,
