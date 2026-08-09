@@ -19,6 +19,7 @@ import { AuditCriteriaPage } from "@/pages/AuditCriteriaPage";
 import { AuditEntryPage } from "@/pages/AuditEntryPage";
 import { CorrectiveActionsPage } from "@/pages/CorrectiveActionsPage";
 import { QualityDashboardPage } from "@/pages/QualityDashboardPage";
+import { AuditAccessPage } from "@/pages/AuditAccessPage";
 import { InventoryPage } from "@/pages/InventoryPage";
 import { ProductionPage } from "@/pages/ProductionPage";
 import { DailyClosingPage } from "@/pages/DailyClosingPage";
@@ -154,6 +155,14 @@ export function App() {
           element={
             <AppShell title={t.qualityDashboardTitle}>
               <QualityDashboardPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/audit-access"
+          element={
+            <AppShell title={t.auditAccessTitle}>
+              <AuditAccessPage />
             </AppShell>
           }
         />

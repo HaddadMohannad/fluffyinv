@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
-import { useActiveLocation } from "@/lib/location/LocationContext";
+import { useAuditLocations } from "@/lib/location/useAuditLocations";
 import { supabase } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
 import { Pill } from "@/components/Pill";
@@ -31,13 +31,14 @@ const emptyForm = {
 export function CorrectiveActionsPage() {
   const { profile } = useAuth();
   const { t } = useLocale();
-  const { locationId } = useActiveLocation();
+  const locations = useAuditLocations();
   const [searchParams] = useSearchParams();
   const visitIdFromLink = searchParams.get("visit_id");
 
   const canWrite =
     profile?.role === "admin" || profile?.role === "branch_manager";
 
+  const [locationId, setLocationId] = useState("");
   const [actions, setActions] = useState<Tables<"corrective_actions">[]>([]);
   const [statusFilter, setStatusFilter] = useState<Status | "all">("all");
   const [form, setForm] = useState(emptyForm);
@@ -45,6 +46,16 @@ export function CorrectiveActionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    if (locations.length === 0) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- recovering a stale/missing selection once the audit-locations list loads
+    setLocationId((current) =>
+      current && locations.some((l) => l.id === current)
+        ? current
+        : locations[0].id
+    );
+  }, [locations]);
 
   useEffect(() => {
     if (!locationId) {
@@ -151,6 +162,21 @@ export function CorrectiveActionsPage() {
       <h1 className="text-fluffy-dark text-2xl font-semibold dark:text-zinc-50">
         {t.correctiveActionsTitle}
       </h1>
+
+      <label className="flex max-w-xs flex-col gap-1 text-sm">
+        {t.branchTypeLabel}
+        <select
+          value={locationId}
+          onChange={(e) => setLocationId(e.target.value)}
+          className="h-11 rounded-md border border-zinc-300 px-3 dark:border-zinc-700 dark:bg-zinc-900"
+        >
+          {locations.map((loc) => (
+            <option key={loc.id} value={loc.id}>
+              {loc.name_ar || loc.name_en}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <label className="flex max-w-xs flex-col gap-1 text-sm">
         {t.statusLabel}

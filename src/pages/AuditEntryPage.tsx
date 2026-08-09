@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
-import { useActiveLocation } from "@/lib/location/LocationContext";
+import { useAuditLocations } from "@/lib/location/useAuditLocations";
 import { supabase } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
 import { Pill } from "@/components/Pill";
@@ -27,19 +27,30 @@ function classify(pct: number | null) {
 export function AuditEntryPage() {
   const { profile } = useAuth();
   const { t } = useLocale();
-  const { locationId, locations } = useActiveLocation();
+  const locations = useAuditLocations();
   const navigate = useNavigate();
 
   const canWrite =
     profile?.role === "admin" || profile?.role === "branch_manager";
 
   const [categories, setCategories] = useState<CategoryWithItems[]>([]);
+  const [locationId, setLocationId] = useState("");
   const [visitDate, setVisitDate] = useState(todayIso());
   const [notes, setNotes] = useState("");
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedVisitId, setSavedVisitId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (locations.length === 0) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- recovering a stale/missing selection once the audit-locations list loads
+    setLocationId((current) =>
+      current && locations.some((l) => l.id === current)
+        ? current
+        : locations[0].id
+    );
+  }, [locations]);
 
   useEffect(() => {
     supabase
@@ -152,11 +163,6 @@ export function AuditEntryPage() {
     setSavedVisitId(data as string);
   }
 
-  const locationName = (id: string) => {
-    const loc = locations.find((l) => l.id === id);
-    return loc ? loc.name_ar || loc.name_en : id;
-  };
-
   if (savedVisitId) {
     return (
       <div className="flex flex-1 flex-col gap-6 p-6">
@@ -228,9 +234,23 @@ export function AuditEntryPage() {
       <div className="flex flex-wrap gap-4">
         <label className="flex flex-col gap-1 text-sm">
           {t.branchTypeLabel}
-          <span className="h-11 rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700">
-            {locationId ? locationName(locationId) : t.selectBranchFirst}
-          </span>
+          {locations.length === 0 ? (
+            <span className="h-11 rounded-md border border-zinc-300 px-3 py-2 text-zinc-500 dark:border-zinc-700">
+              {t.selectBranchFirst}
+            </span>
+          ) : (
+            <select
+              value={locationId}
+              onChange={(e) => setLocationId(e.target.value)}
+              className="h-11 rounded-md border border-zinc-300 px-3 dark:border-zinc-700 dark:bg-zinc-900"
+            >
+              {locations.map((loc) => (
+                <option key={loc.id} value={loc.id}>
+                  {loc.name_ar || loc.name_en}
+                </option>
+              ))}
+            </select>
+          )}
         </label>
         <label className="flex flex-col gap-1 text-sm">
           {t.visitDateLabel}

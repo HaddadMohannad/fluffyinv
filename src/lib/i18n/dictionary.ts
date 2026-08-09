@@ -408,6 +408,11 @@ export const dictionary = {
     needsInterventionCountLabel: "Needs intervention",
     openActionsCountLabel: "Open actions",
     recentVisitsTitle: "Recent visits",
+    auditAccessTitle: "Audit Access",
+    noBranchManagersYet: "No branch managers yet.",
+    managerLabel: "Manager",
+    auditAccessGranted: "Granted",
+    ownBranchLabel: "own branch",
   },
   ar: {
     appName: "فلافي - المخزون",
@@ -814,6 +819,11 @@ export const dictionary = {
     needsInterventionCountLabel: "يحتاج تدخل إداري",
     openActionsCountLabel: "إجراءات مفتوحة",
     recentVisitsTitle: "الزيارات الأخيرة",
+    auditAccessTitle: "صلاحيات التدقيق",
+    noBranchManagersYet: "لا يوجد مدراء فروع بعد.",
+    managerLabel: "المدير",
+    auditAccessGranted: "ممنوح",
+    ownBranchLabel: "فرعه الأساسي",
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 

@@ -32,6 +32,7 @@ import {
   ShieldCheck,
   Wrench,
   Gauge,
+  UserCog,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
@@ -174,6 +175,12 @@ const NAV_ITEMS: NavItem[] = [
     labelKey: "qualityDashboardTitle",
     icon: Gauge,
     roles: ["admin", "accountant", "branch_manager"],
+  },
+  {
+    href: "/audit-access",
+    labelKey: "auditAccessTitle",
+    icon: UserCog,
+    roles: ["admin"],
   },
   {
     href: "/unmatched-items",

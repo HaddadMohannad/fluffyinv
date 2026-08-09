@@ -160,6 +160,42 @@ export type Database = {
           },
         ];
       };
+      audit_location_grants: {
+        Row: {
+          created_at: string;
+          id: string;
+          location_id: string;
+          profile_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          location_id: string;
+          profile_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          location_id?: string;
+          profile_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "audit_location_grants_location_id_fkey";
+            columns: ["location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "audit_location_grants_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       audit_visits: {
         Row: {
           auditor_id: string | null;
@@ -1788,6 +1824,10 @@ export type Database = {
           metric_value: number;
           threshold_value: number;
         }[];
+      };
+      has_audit_location_access: {
+        Args: { p_location_id: string };
+        Returns: boolean;
       };
       my_location: { Args: never; Returns: string };
       my_role: {
