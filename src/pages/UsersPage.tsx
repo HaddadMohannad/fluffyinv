@@ -13,16 +13,22 @@ const ROLES: Role[] = [
   "branch_manager",
   "warehouse_staff",
   "accountant",
+  "inspector",
 ];
 
 const ROLE_LABEL_KEY: Record<
   Role,
-  "roleAdmin" | "roleBranchManager" | "roleWarehouseStaff" | "roleAccountant"
+  | "roleAdmin"
+  | "roleBranchManager"
+  | "roleWarehouseStaff"
+  | "roleAccountant"
+  | "roleInspector"
 > = {
   admin: "roleAdmin",
   branch_manager: "roleBranchManager",
   warehouse_staff: "roleWarehouseStaff",
   accountant: "roleAccountant",
+  inspector: "roleInspector",
 };
 
 export function UsersPage() {
@@ -375,7 +381,8 @@ export function UsersPage() {
                 <h2 className="text-lg font-semibold">
                   {t.branchesLinkedTitle}
                 </h2>
-                {selectedUser.role !== "branch_manager" ? (
+                {selectedUser.role !== "branch_manager" &&
+                selectedUser.role !== "inspector" ? (
                   <p className="text-sm text-zinc-500 dark:text-zinc-400">
                     {t.noneValue}
                   </p>

@@ -33,7 +33,13 @@ export type NavItem = {
   href: string;
   labelKey: keyof (typeof dictionary)["en"];
   icon: LucideIcon;
-  roles?: Array<"admin" | "branch_manager" | "warehouse_staff" | "accountant">;
+  roles?: Array<
+    | "admin"
+    | "branch_manager"
+    | "warehouse_staff"
+    | "accountant"
+    | "inspector"
+  >;
 };
 
 export const NAV_ITEMS: NavItem[] = [
@@ -151,19 +157,19 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/audit-entry",
     labelKey: "qualityAudit",
     icon: ShieldCheck,
-    roles: ["admin", "branch_manager"],
+    roles: ["admin", "branch_manager", "inspector"],
   },
   {
     href: "/corrective-actions",
     labelKey: "correctiveActionsTitle",
     icon: Wrench,
-    roles: ["admin", "branch_manager"],
+    roles: ["admin", "branch_manager", "inspector"],
   },
   {
     href: "/quality-dashboard",
     labelKey: "qualityDashboardTitle",
     icon: Gauge,
-    roles: ["admin", "accountant", "branch_manager"],
+    roles: ["admin", "accountant", "branch_manager", "inspector"],
   },
   {
     href: "/audit-access",

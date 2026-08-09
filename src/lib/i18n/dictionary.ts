@@ -446,6 +446,7 @@ export const dictionary = {
     roleBranchManager: "Branch manager",
     roleWarehouseStaff: "Warehouse staff",
     roleAccountant: "Accountant",
+    roleInspector: "Inspector",
   },
   ar: {
     appName: "فلافي - المخزون",
@@ -890,6 +891,7 @@ export const dictionary = {
     roleBranchManager: "مدير فرع",
     roleWarehouseStaff: "موظف مستودع",
     roleAccountant: "محاسب",
+    roleInspector: "مفتش الجودة",
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 

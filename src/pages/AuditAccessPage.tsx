@@ -22,7 +22,7 @@ export function AuditAccessPage() {
     supabase
       .from("profiles")
       .select("*")
-      .eq("role", "branch_manager")
+      .in("role", ["branch_manager", "inspector"])
       .order("full_name")
       .then(({ data }) => {
         const rows = data ?? [];

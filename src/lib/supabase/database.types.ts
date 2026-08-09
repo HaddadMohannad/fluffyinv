@@ -2050,7 +2050,12 @@ export type Database = {
       sales_source: "foodics" | "talabat" | "careem" | "manual" | "pos";
       stocktake_status: "draft" | "submitted" | "approved";
       transfer_status: "pending" | "completed" | "cancelled";
-      user_role: "admin" | "branch_manager" | "warehouse_staff" | "accountant";
+      user_role:
+        | "admin"
+        | "branch_manager"
+        | "warehouse_staff"
+        | "accountant"
+        | "inspector";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -2200,7 +2205,13 @@ export const Constants = {
       sales_source: ["foodics", "talabat", "careem", "manual", "pos"],
       stocktake_status: ["draft", "submitted", "approved"],
       transfer_status: ["pending", "completed", "cancelled"],
-      user_role: ["admin", "branch_manager", "warehouse_staff", "accountant"],
+      user_role: [
+        "admin",
+        "branch_manager",
+        "warehouse_staff",
+        "accountant",
+        "inspector",
+      ],
     },
   },
 } as const;
