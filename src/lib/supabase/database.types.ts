@@ -1056,6 +1056,29 @@ export type Database = {
         };
         Relationships: [];
       };
+      profile_module_grants: {
+        Row: {
+          module_href: string;
+          profile_id: string;
+        };
+        Insert: {
+          module_href: string;
+          profile_id: string;
+        };
+        Update: {
+          module_href?: string;
+          profile_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "profile_module_grants_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       profiles: {
         Row: {
           active: boolean;

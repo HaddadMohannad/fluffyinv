@@ -447,6 +447,9 @@ export const dictionary = {
     roleWarehouseStaff: "Warehouse staff",
     roleAccountant: "Accountant",
     roleInspector: "Inspector",
+    resetModulesToDefault: "Reset to role default",
+    moduleVisibilityNote:
+      "Controls which tabs this person sees. It doesn't grant extra permissions beyond their role — turning on a module their role can't actually use will show the tab but its actions will still fail.",
   },
   ar: {
     appName: "فلافي - المخزون",
@@ -892,6 +895,9 @@ export const dictionary = {
     roleWarehouseStaff: "موظف مستودع",
     roleAccountant: "محاسب",
     roleInspector: "مفتش الجودة",
+    resetModulesToDefault: "إعادة الضبط لصلاحيات الدور",
+    moduleVisibilityNote:
+      "يتحكم فقط بالأقسام التي تظهر لهذا الشخص. لا يمنحه صلاحيات إضافية تتجاوز دوره — تفعيل قسم لا يسمح به دوره سيُظهر التبويب لكن الإجراءات بداخله ستبقى مرفوضة.",
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 
