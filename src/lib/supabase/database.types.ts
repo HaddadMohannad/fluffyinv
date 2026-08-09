@@ -1060,6 +1060,7 @@ export type Database = {
         Row: {
           active: boolean;
           created_at: string;
+          email: string | null;
           full_name: string;
           id: string;
           location_id: string | null;
@@ -1068,6 +1069,7 @@ export type Database = {
         Insert: {
           active?: boolean;
           created_at?: string;
+          email?: string | null;
           full_name: string;
           id: string;
           location_id?: string | null;
@@ -1076,6 +1078,7 @@ export type Database = {
         Update: {
           active?: boolean;
           created_at?: string;
+          email?: string | null;
           full_name?: string;
           id?: string;
           location_id?: string | null;
@@ -1225,6 +1228,57 @@ export type Database = {
             columns: ["location_id"];
             isOneToOne: false;
             referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      signup_requests: {
+        Row: {
+          assigned_location_id: string | null;
+          assigned_role: Database["public"]["Enums"]["user_role"] | null;
+          decided_at: string | null;
+          decided_by: string | null;
+          email: string;
+          full_name: string | null;
+          id: string;
+          requested_at: string;
+          status: string;
+        };
+        Insert: {
+          assigned_location_id?: string | null;
+          assigned_role?: Database["public"]["Enums"]["user_role"] | null;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          email: string;
+          full_name?: string | null;
+          id: string;
+          requested_at?: string;
+          status?: string;
+        };
+        Update: {
+          assigned_location_id?: string | null;
+          assigned_role?: Database["public"]["Enums"]["user_role"] | null;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          email?: string;
+          full_name?: string | null;
+          id?: string;
+          requested_at?: string;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "signup_requests_assigned_location_id_fkey";
+            columns: ["assigned_location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "signup_requests_decided_by_fkey";
+            columns: ["decided_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
         ];
@@ -1770,11 +1824,31 @@ export type Database = {
           },
         ];
       };
+      v_user_activity_log: {
+        Row: {
+          action: string | null;
+          actor_id: string | null;
+          created_at: string | null;
+          detail: string | null;
+          location_id: string | null;
+          record_id: string | null;
+          source_table: string | null;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
       apply_product_alias: {
         Args: { p_product_id: string; p_raw_name: string };
         Returns: number;
+      };
+      approve_signup_request: {
+        Args: {
+          p_location_id?: string;
+          p_request_id: string;
+          p_role: Database["public"]["Enums"]["user_role"];
+        };
+        Returns: undefined;
       };
       approve_stocktake: {
         Args: { p_stocktake_id: string };
@@ -1919,6 +1993,10 @@ export type Database = {
           record_id: string;
           value_lost: number;
         }[];
+      };
+      reject_signup_request: {
+        Args: { p_request_id: string };
+        Returns: undefined;
       };
       reopen_day: {
         Args: { p_close_date: string; p_location_id: string; p_reason: string };
