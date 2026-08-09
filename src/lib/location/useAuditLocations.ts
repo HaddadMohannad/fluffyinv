@@ -5,9 +5,9 @@ import type { Tables } from "@/lib/supabase/database.types";
 
 // Locations a profile can audit: admins see every branch (matching how
 // admin location access works everywhere else in the app); a branch
-// manager sees their own location plus anything granted to them in
-// audit_location_grants (FLU-48); everyone else sees none, since only
-// admin/branch_manager can write audits in the first place.
+// manager or inspector sees their own location (if any) plus anything
+// granted to them in audit_location_grants (FLU-48); everyone else sees
+// none, since only admin/branch_manager/inspector can write audits.
 export function useAuditLocations() {
   const { profile } = useAuth();
   const [locations, setLocations] = useState<Tables<"locations">[]>([]);
@@ -28,7 +28,7 @@ export function useAuditLocations() {
       return;
     }
 
-    if (profile.role !== "branch_manager") {
+    if (profile.role !== "branch_manager" && profile.role !== "inspector") {
       setLocations([]);
       return;
     }

@@ -36,7 +36,9 @@ export function CorrectiveActionsPage() {
   const visitIdFromLink = searchParams.get("visit_id");
 
   const canWrite =
-    profile?.role === "admin" || profile?.role === "branch_manager";
+    profile?.role === "admin" ||
+    profile?.role === "branch_manager" ||
+    profile?.role === "inspector";
 
   const [locationId, setLocationId] = useState("");
   const [actions, setActions] = useState<Tables<"corrective_actions">[]>([]);

@@ -31,7 +31,9 @@ export function AuditEntryPage() {
   const navigate = useNavigate();
 
   const canWrite =
-    profile?.role === "admin" || profile?.role === "branch_manager";
+    profile?.role === "admin" ||
+    profile?.role === "branch_manager" ||
+    profile?.role === "inspector";
 
   const [categories, setCategories] = useState<CategoryWithItems[]>([]);
   const [locationId, setLocationId] = useState("");
