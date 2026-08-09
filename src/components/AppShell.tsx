@@ -39,10 +39,13 @@ export function AppShell({
     useActiveLocation();
   const routerLocation = useLocation();
 
-  const visibleItems = NAV_ITEMS.filter(
-    (item) =>
-      !item.roles || (profile?.role && item.roles.includes(profile.role))
-  );
+  const visibleItems = NAV_ITEMS.filter((item) => {
+    // Home always shows — it's where the pending-approval message lives
+    // for a session with no profile yet. Everything else needs a profile.
+    if (item.href === "/") return true;
+    if (!profile) return false;
+    return !item.roles || item.roles.includes(profile.role);
+  });
 
   const activeLocationName = isLocationLocked
     ? location
