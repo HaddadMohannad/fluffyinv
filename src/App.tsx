@@ -16,6 +16,9 @@ import { BranchManagementPage } from "@/pages/BranchManagementPage";
 import { WastePage } from "@/pages/WastePage";
 import { LookupListsPage } from "@/pages/LookupListsPage";
 import { AuditCriteriaPage } from "@/pages/AuditCriteriaPage";
+import { AuditEntryPage } from "@/pages/AuditEntryPage";
+import { CorrectiveActionsPage } from "@/pages/CorrectiveActionsPage";
+import { QualityDashboardPage } from "@/pages/QualityDashboardPage";
 import { InventoryPage } from "@/pages/InventoryPage";
 import { ProductionPage } from "@/pages/ProductionPage";
 import { DailyClosingPage } from "@/pages/DailyClosingPage";
@@ -127,6 +130,30 @@ export function App() {
           element={
             <AppShell title={t.auditCriteriaTitle}>
               <AuditCriteriaPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/audit-entry"
+          element={
+            <AppShell title={t.auditEntryTitle}>
+              <AuditEntryPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/corrective-actions"
+          element={
+            <AppShell title={t.correctiveActionsTitle}>
+              <CorrectiveActionsPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/quality-dashboard"
+          element={
+            <AppShell title={t.qualityDashboardTitle}>
+              <QualityDashboardPage />
             </AppShell>
           }
         />

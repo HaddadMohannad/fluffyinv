@@ -241,6 +241,96 @@ export type Database = {
           },
         ];
       };
+      corrective_actions: {
+        Row: {
+          action_required: string | null;
+          actual_cost: number | null;
+          created_at: string;
+          created_by: string | null;
+          description: string;
+          due_date: string | null;
+          estimated_cost: number | null;
+          id: string;
+          item_id: string | null;
+          location_id: string;
+          owner: string | null;
+          recheck_date: string | null;
+          recheck_result: string | null;
+          status: string;
+          visit_id: string | null;
+        };
+        Insert: {
+          action_required?: string | null;
+          actual_cost?: number | null;
+          created_at?: string;
+          created_by?: string | null;
+          description: string;
+          due_date?: string | null;
+          estimated_cost?: number | null;
+          id?: string;
+          item_id?: string | null;
+          location_id: string;
+          owner?: string | null;
+          recheck_date?: string | null;
+          recheck_result?: string | null;
+          status?: string;
+          visit_id?: string | null;
+        };
+        Update: {
+          action_required?: string | null;
+          actual_cost?: number | null;
+          created_at?: string;
+          created_by?: string | null;
+          description?: string;
+          due_date?: string | null;
+          estimated_cost?: number | null;
+          id?: string;
+          item_id?: string | null;
+          location_id?: string;
+          owner?: string | null;
+          recheck_date?: string | null;
+          recheck_result?: string | null;
+          status?: string;
+          visit_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "corrective_actions_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "corrective_actions_item_id_fkey";
+            columns: ["item_id"];
+            isOneToOne: false;
+            referencedRelation: "audit_items";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "corrective_actions_location_id_fkey";
+            columns: ["location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "corrective_actions_visit_id_fkey";
+            columns: ["visit_id"];
+            isOneToOne: false;
+            referencedRelation: "audit_visits";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "corrective_actions_visit_id_fkey";
+            columns: ["visit_id"];
+            isOneToOne: false;
+            referencedRelation: "v_audit_visit_scores";
+            referencedColumns: ["visit_id"];
+          },
+        ];
+      };
       day_closes: {
         Row: {
           close_date: string;
@@ -1721,9 +1811,9 @@ export type Database = {
       record_audit_visit: {
         Args: {
           p_location_id: string;
-          p_notes: string;
-          p_scores: Json;
-          p_visit_date: string;
+          p_notes?: string;
+          p_scores?: Json;
+          p_visit_date?: string;
         };
         Returns: string;
       };

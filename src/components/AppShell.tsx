@@ -29,6 +29,9 @@ import {
   PackageSearch,
   X,
   ListChecks,
+  ShieldCheck,
+  Wrench,
+  Gauge,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
@@ -153,6 +156,24 @@ const NAV_ITEMS: NavItem[] = [
     labelKey: "auditCriteria",
     icon: ListChecks,
     roles: ["admin"],
+  },
+  {
+    href: "/audit-entry",
+    labelKey: "qualityAudit",
+    icon: ShieldCheck,
+    roles: ["admin", "branch_manager"],
+  },
+  {
+    href: "/corrective-actions",
+    labelKey: "correctiveActionsTitle",
+    icon: Wrench,
+    roles: ["admin", "branch_manager"],
+  },
+  {
+    href: "/quality-dashboard",
+    labelKey: "qualityDashboardTitle",
+    icon: Gauge,
+    roles: ["admin", "accountant", "branch_manager"],
   },
   {
     href: "/unmatched-items",
