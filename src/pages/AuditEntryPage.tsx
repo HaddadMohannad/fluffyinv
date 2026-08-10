@@ -348,7 +348,7 @@ export function AuditEntryPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6 pb-36">
+    <div className="flex flex-1 flex-col gap-6 p-6 pb-24">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-fluffy-dark text-2xl font-semibold dark:text-zinc-50">
           {t.auditEntryTitle}
@@ -544,7 +544,7 @@ export function AuditEntryPage() {
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <div className="fixed inset-x-0 bottom-16 flex justify-end border-t border-zinc-200 bg-white p-4 md:bottom-0 dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="fixed inset-x-0 bottom-0 flex justify-end border-t border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
         <button
           type="button"
           onClick={handleSave}
