@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
@@ -18,7 +19,6 @@ import { LookupListsPage } from "@/pages/LookupListsPage";
 import { AuditCriteriaPage } from "@/pages/AuditCriteriaPage";
 import { AuditEntryPage } from "@/pages/AuditEntryPage";
 import { CorrectiveActionsPage } from "@/pages/CorrectiveActionsPage";
-import { QualityDashboardPage } from "@/pages/QualityDashboardPage";
 import { AuditAccessPage } from "@/pages/AuditAccessPage";
 import { VisitDetailPage } from "@/pages/VisitDetailPage";
 import { InventoryPage } from "@/pages/InventoryPage";
@@ -31,6 +31,23 @@ import { ConsumptionReportPage } from "@/pages/ConsumptionReportPage";
 import { CashAndExpensesPage } from "@/pages/CashAndExpensesPage";
 import { ProductAliasesPage } from "@/pages/ProductAliasesPage";
 import { UsersPage } from "@/pages/UsersPage";
+
+// Charting (recharts) adds significant weight — only load it for people
+// who actually open the quality dashboard.
+const QualityDashboardPage = lazy(() =>
+  import("@/pages/QualityDashboardPage").then((m) => ({
+    default: m.QualityDashboardPage,
+  }))
+);
+
+function PageLoadingFallback() {
+  const { t } = useLocale();
+  return (
+    <div className="flex flex-1 items-center justify-center p-6 text-sm text-zinc-500">
+      {t.loadingSales}
+    </div>
+  );
+}
 
 export function App() {
   const { t } = useLocale();
@@ -156,7 +173,9 @@ export function App() {
           path="/quality-dashboard"
           element={
             <AppShell title={t.qualityDashboardTitle}>
-              <QualityDashboardPage />
+              <Suspense fallback={<PageLoadingFallback />}>
+                <QualityDashboardPage />
+              </Suspense>
             </AppShell>
           }
         />
