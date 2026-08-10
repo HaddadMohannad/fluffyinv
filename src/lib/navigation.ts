@@ -197,3 +197,93 @@ export function roleDefaultHrefs(role: Role): Set<string> {
   }
   return hrefs;
 }
+
+export type NavGroup = {
+  key: string;
+  labelKey: keyof (typeof dictionary)["en"];
+  icon: LucideIcon;
+  // Order here is the order items render in when the group is expanded.
+  hrefs: string[];
+};
+
+// Related modules collapsed under one expandable entry so the nav
+// doesn't read as one long flat list. An item not listed in any group's
+// hrefs renders at the top level as before.
+export const NAV_GROUPS: NavGroup[] = [
+  {
+    key: "quality-audits",
+    labelKey: "auditGroupLabel",
+    icon: ShieldCheck,
+    hrefs: [
+      "/audit-entry",
+      "/corrective-actions",
+      "/quality-dashboard",
+      "/audit-criteria",
+      "/audit-access",
+    ],
+  },
+  {
+    key: "inventory-ops",
+    labelKey: "inventoryGroupLabel",
+    icon: Package,
+    hrefs: [
+      "/inventory",
+      "/opening-stock",
+      "/purchase",
+      "/transfer",
+      "/production",
+      "/stocktake",
+      "/waste",
+      "/hospitality",
+      "/consumption",
+    ],
+  },
+  {
+    key: "finance",
+    labelKey: "financeGroupLabel",
+    icon: Calculator,
+    hrefs: [
+      "/daily-closing",
+      "/cash-expenses",
+      "/accountant",
+      "/suppliers",
+      "/alerts",
+    ],
+  },
+  {
+    key: "admin-settings",
+    labelKey: "adminGroupLabel",
+    icon: Settings2,
+    hrefs: ["/branches", "/lookup-lists", "/unmatched-items", "/users"],
+  },
+];
+
+export type NavNode =
+  | { kind: "item"; item: NavItem }
+  | { kind: "group"; group: NavGroup; items: NavItem[] };
+
+// Folds a flat, already role/grant-filtered item list into top-level
+// items plus grouped runs, in the position of each group's first member
+// — so the overall order still matches NAV_ITEMS. A group never appears
+// with zero items since every item it contains came from the input list.
+export function groupNavItems(items: NavItem[]): NavNode[] {
+  const byHref = new Map(items.map((item) => [item.href, item]));
+  const rendered = new Set<string>();
+  const nodes: NavNode[] = [];
+
+  for (const item of items) {
+    const group = NAV_GROUPS.find((g) => g.hrefs.includes(item.href));
+    if (!group) {
+      nodes.push({ kind: "item", item });
+      continue;
+    }
+    if (rendered.has(group.key)) continue;
+    rendered.add(group.key);
+    const groupItems = group.hrefs
+      .map((href) => byHref.get(href))
+      .filter((i): i is NavItem => Boolean(i));
+    nodes.push({ kind: "group", group, items: groupItems });
+  }
+
+  return nodes;
+}
