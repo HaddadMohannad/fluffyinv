@@ -32,6 +32,7 @@ import { CashAndExpensesPage } from "@/pages/CashAndExpensesPage";
 import { ProductAliasesPage } from "@/pages/ProductAliasesPage";
 import { UsersPage } from "@/pages/UsersPage";
 import { SettingsPage } from "@/pages/SettingsPage";
+import { BranchComparisonPage } from "@/pages/BranchComparisonPage";
 
 // Charting (recharts) adds significant weight — only load it for people
 // who actually open the quality dashboard.
@@ -281,6 +282,14 @@ export function App() {
           element={
             <AppShell title={t.settingsTitle}>
               <SettingsPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/branch-comparison"
+          element={
+            <AppShell title={t.branchComparisonTitle}>
+              <BranchComparisonPage />
             </AppShell>
           }
         />

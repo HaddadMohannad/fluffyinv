@@ -27,6 +27,7 @@ import {
   UserCog,
   Users,
   PackageSearch,
+  GitCompare,
 } from "lucide-react";
 import { dictionary } from "@/lib/i18n/dictionary";
 
@@ -193,6 +194,12 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Settings,
     roles: ["admin"],
   },
+  {
+    href: "/branch-comparison",
+    labelKey: "branchComparison",
+    icon: GitCompare,
+    roles: ["admin", "accountant"],
+  },
 ];
 
 // Every module a role sees out of the box, before any per-user
@@ -255,6 +262,7 @@ export const NAV_GROUPS: NavGroup[] = [
       "/accountant",
       "/suppliers",
       "/alerts",
+      "/branch-comparison",
     ],
   },
   {
