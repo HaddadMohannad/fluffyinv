@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { ChevronDown } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
 import { useAuditLocations } from "@/lib/location/useAuditLocations";
@@ -70,6 +71,9 @@ export function AuditEntryPage() {
     initialDraft?.answers ?? {}
   );
   const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
+    () => new Set()
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedVisitId, setSavedVisitId] = useState<string | null>(null);
@@ -157,6 +161,16 @@ export function AuditEntryPage() {
           evidenceUrls: prev[item.id]?.evidenceUrls ?? [],
         };
       }
+      return next;
+    });
+    setExpandedCategories((prev) => new Set(prev).add(category.id));
+  }
+
+  function toggleCategory(categoryId: string) {
+    setExpandedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(categoryId)) next.delete(categoryId);
+      else next.add(categoryId);
       return next;
     });
   }
@@ -411,126 +425,147 @@ export function AuditEntryPage() {
         </label>
       </div>
 
-      {categories.map((category) => (
-        <section key={category.id} className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-lg font-semibold">{category.name}</h2>
-            <div className="flex gap-1">
+      {categories.map((category) => {
+        const isOpen = expandedCategories.has(category.id);
+        const answeredCount = category.audit_items.filter(
+          (item) => answers[item.id]?.touched
+        ).length;
+        return (
+          <section key={category.id} className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <button
                 type="button"
-                onClick={() => applyCategoryScore(category, 1)}
-                className="h-8 rounded-md border border-green-600 px-2 text-xs font-medium text-green-600"
+                onClick={() => toggleCategory(category.id)}
+                aria-expanded={isOpen}
+                className="flex flex-1 items-center gap-2 text-start"
               >
-                {t.applyPassAll}
+                <ChevronDown
+                  className={`h-4 w-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                />
+                <h2 className="text-lg font-semibold">{category.name}</h2>
+                <span className="text-xs font-normal text-zinc-500 dark:text-zinc-400">
+                  ({answeredCount}/{category.audit_items.length})
+                </span>
               </button>
-              <button
-                type="button"
-                onClick={() => applyCategoryScore(category, 0)}
-                className="h-8 rounded-md border border-red-600 px-2 text-xs font-medium text-red-600"
-              >
-                {t.applyFailAll}
-              </button>
-              <button
-                type="button"
-                onClick={() => applyCategoryScore(category, null)}
-                className="h-8 rounded-md border border-zinc-500 px-2 text-xs font-medium text-zinc-500"
-              >
-                {t.applyNaAll}
-              </button>
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => applyCategoryScore(category, 1)}
+                  className="h-8 rounded-md border border-green-600 px-2 text-xs font-medium text-green-600"
+                >
+                  {t.applyPassAll}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyCategoryScore(category, 0)}
+                  className="h-8 rounded-md border border-red-600 px-2 text-xs font-medium text-red-600"
+                >
+                  {t.applyFailAll}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyCategoryScore(category, null)}
+                  className="h-8 rounded-md border border-zinc-500 px-2 text-xs font-medium text-zinc-500"
+                >
+                  {t.applyNaAll}
+                </button>
+              </div>
             </div>
-          </div>
-          <div className="flex flex-col divide-y divide-zinc-100 rounded-md border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-            {category.audit_items.map((item) => {
-              const a = answers[item.id];
-              return (
-                <div key={item.id} className="flex flex-col gap-2 p-3">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <p className="text-sm font-medium">{item.label}</p>
-                      {item.definition && (
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                          {item.definition}
-                        </p>
+            {isOpen && (
+              <div className="flex flex-col divide-y divide-zinc-100 rounded-md border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+                {category.audit_items.map((item) => {
+                  const a = answers[item.id];
+                  return (
+                    <div key={item.id} className="flex flex-col gap-2 p-3">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-medium">{item.label}</p>
+                          {item.definition && (
+                            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                              {item.definition}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex shrink-0 gap-1">
+                          {(
+                            [
+                              { value: 1 as const, label: t.scorePass },
+                              { value: 0 as const, label: t.scoreFail },
+                              { value: null, label: t.scoreNa },
+                            ] satisfies { value: 0 | 1 | null; label: string }[]
+                          ).map((opt) => (
+                            <button
+                              key={String(opt.value)}
+                              type="button"
+                              onClick={() => setAnswer(item.id, opt.value)}
+                              className={`h-9 rounded-md border px-3 text-xs font-medium ${
+                                a?.touched && a.score === opt.value
+                                  ? opt.value === 1
+                                    ? "border-green-600 bg-green-600 text-white"
+                                    : opt.value === 0
+                                      ? "border-red-600 bg-red-600 text-white"
+                                      : "border-zinc-500 bg-zinc-500 text-white"
+                                  : "border-zinc-300 dark:border-zinc-700"
+                              }`}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      {a?.touched && a.score === 0 && (
+                        <div className="flex flex-col gap-2">
+                          <input
+                            type="text"
+                            value={a.note}
+                            onChange={(e) => setNote(item.id, e.target.value)}
+                            placeholder={t.noteOptional}
+                            className="h-9 rounded-md border border-zinc-300 px-3 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                          />
+                          <div className="flex flex-wrap items-center gap-2">
+                            <label className="text-fluffy-orange cursor-pointer text-xs font-medium">
+                              {uploadingItemId === item.id
+                                ? t.uploadingEvidence
+                                : t.attachEvidence}
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                disabled={uploadingItemId === item.id}
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) handleEvidenceUpload(item.id, file);
+                                  e.target.value = "";
+                                }}
+                              />
+                            </label>
+                            {a.evidenceUrls.map((path) => (
+                              <span
+                                key={path}
+                                className="flex items-center gap-1 rounded-full border border-zinc-300 px-2 py-1 text-xs dark:border-zinc-700"
+                              >
+                                {t.evidenceAttached}
+                                <button
+                                  type="button"
+                                  onClick={() => removeEvidence(item.id, path)}
+                                  aria-label={t.removeLine}
+                                  className="text-red-600"
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
                       )}
                     </div>
-                    <div className="flex shrink-0 gap-1">
-                      {(
-                        [
-                          { value: 1 as const, label: t.scorePass },
-                          { value: 0 as const, label: t.scoreFail },
-                          { value: null, label: t.scoreNa },
-                        ] satisfies { value: 0 | 1 | null; label: string }[]
-                      ).map((opt) => (
-                        <button
-                          key={String(opt.value)}
-                          type="button"
-                          onClick={() => setAnswer(item.id, opt.value)}
-                          className={`h-9 rounded-md border px-3 text-xs font-medium ${
-                            a?.touched && a.score === opt.value
-                              ? opt.value === 1
-                                ? "border-green-600 bg-green-600 text-white"
-                                : opt.value === 0
-                                  ? "border-red-600 bg-red-600 text-white"
-                                  : "border-zinc-500 bg-zinc-500 text-white"
-                              : "border-zinc-300 dark:border-zinc-700"
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  {a?.touched && a.score === 0 && (
-                    <div className="flex flex-col gap-2">
-                      <input
-                        type="text"
-                        value={a.note}
-                        onChange={(e) => setNote(item.id, e.target.value)}
-                        placeholder={t.noteOptional}
-                        className="h-9 rounded-md border border-zinc-300 px-3 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-                      />
-                      <div className="flex flex-wrap items-center gap-2">
-                        <label className="text-fluffy-orange cursor-pointer text-xs font-medium">
-                          {uploadingItemId === item.id
-                            ? t.uploadingEvidence
-                            : t.attachEvidence}
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            disabled={uploadingItemId === item.id}
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleEvidenceUpload(item.id, file);
-                              e.target.value = "";
-                            }}
-                          />
-                        </label>
-                        {a.evidenceUrls.map((path) => (
-                          <span
-                            key={path}
-                            className="flex items-center gap-1 rounded-full border border-zinc-300 px-2 py-1 text-xs dark:border-zinc-700"
-                          >
-                            {t.evidenceAttached}
-                            <button
-                              type="button"
-                              onClick={() => removeEvidence(item.id, path)}
-                              aria-label={t.removeLine}
-                              className="text-red-600"
-                            >
-                              ×
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      ))}
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        );
+      })}
 
       <label className="flex flex-col gap-1 text-sm">
         {t.generalNotesLabel}
