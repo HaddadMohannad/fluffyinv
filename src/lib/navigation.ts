@@ -19,6 +19,7 @@ import {
   Heart,
   Trash2,
   Settings2,
+  Settings,
   ListChecks,
   ShieldCheck,
   Wrench,
@@ -186,6 +187,12 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Users,
     roles: ["admin"],
   },
+  {
+    href: "/settings",
+    labelKey: "settingsTitle",
+    icon: Settings,
+    roles: ["admin"],
+  },
 ];
 
 // Every module a role sees out of the box, before any per-user
@@ -254,7 +261,13 @@ export const NAV_GROUPS: NavGroup[] = [
     key: "admin-settings",
     labelKey: "adminGroupLabel",
     icon: Settings2,
-    hrefs: ["/branches", "/lookup-lists", "/unmatched-items", "/users"],
+    hrefs: [
+      "/branches",
+      "/lookup-lists",
+      "/unmatched-items",
+      "/users",
+      "/settings",
+    ],
   },
 ];
 
