@@ -19,6 +19,7 @@ import {
   Heart,
   Trash2,
   Settings2,
+  Settings,
   ListChecks,
   ShieldCheck,
   Wrench,
@@ -188,6 +189,12 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["admin"],
   },
   {
+    href: "/settings",
+    labelKey: "settingsTitle",
+    icon: Settings,
+    roles: ["admin"],
+  },
+  {
     href: "/branch-comparison",
     labelKey: "branchComparison",
     icon: GitCompare,
@@ -262,7 +269,13 @@ export const NAV_GROUPS: NavGroup[] = [
     key: "admin-settings",
     labelKey: "adminGroupLabel",
     icon: Settings2,
-    hrefs: ["/branches", "/lookup-lists", "/unmatched-items", "/users"],
+    hrefs: [
+      "/branches",
+      "/lookup-lists",
+      "/unmatched-items",
+      "/users",
+      "/settings",
+    ],
   },
 ];
 

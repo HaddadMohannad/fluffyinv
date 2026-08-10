@@ -31,6 +31,7 @@ import { ConsumptionReportPage } from "@/pages/ConsumptionReportPage";
 import { CashAndExpensesPage } from "@/pages/CashAndExpensesPage";
 import { ProductAliasesPage } from "@/pages/ProductAliasesPage";
 import { UsersPage } from "@/pages/UsersPage";
+import { SettingsPage } from "@/pages/SettingsPage";
 import { BranchComparisonPage } from "@/pages/BranchComparisonPage";
 
 // Charting (recharts) adds significant weight — only load it for people
@@ -273,6 +274,14 @@ export function App() {
           element={
             <AppShell title={t.usersTitle}>
               <UsersPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <AppShell title={t.settingsTitle}>
+              <SettingsPage />
             </AppShell>
           }
         />
