@@ -1899,6 +1899,7 @@ export type Database = {
         Returns: string;
       };
       delete_all_business_data: { Args: never; Returns: Json };
+      delete_audit_visit: { Args: { p_visit_id: string }; Returns: undefined };
       get_daily_closing_report: {
         Args: { p_close_date: string; p_location_id: string };
         Returns: {
@@ -2048,6 +2049,15 @@ export type Database = {
       start_stocktake: { Args: { p_location_id: string }; Returns: string };
       submit_stocktake: {
         Args: { p_stocktake_id: string };
+        Returns: undefined;
+      };
+      update_audit_visit: {
+        Args: {
+          p_notes?: string;
+          p_scores?: Json;
+          p_visit_date?: string;
+          p_visit_id: string;
+        };
         Returns: undefined;
       };
     };

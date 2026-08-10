@@ -470,6 +470,9 @@ export const dictionary = {
     visitNotFound: "Visit not found.",
     visitDetailsTitle: "Visit Details",
     auditNoteLabel: "Audit note",
+    deleteVisit: "Delete visit",
+    confirmDeleteVisit: "Delete this visit? This cannot be undone.",
+    confirmDeleteValue: "Yes, delete",
   },
   ar: {
     appName: "فلافي - المخزون",
@@ -939,6 +942,10 @@ export const dictionary = {
     visitNotFound: "الزيارة غير موجودة.",
     visitDetailsTitle: "تفاصيل الزيارة",
     auditNoteLabel: "ملاحظة التدقيق",
+    deleteVisit: "حذف الزيارة",
+    confirmDeleteVisit:
+      "هل تريد حذف هذه الزيارة؟ لا يمكن التراجع عن هذا الإجراء.",
+    confirmDeleteValue: "نعم، احذف",
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 
