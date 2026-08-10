@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
+import { BarChart3, ChevronDown } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -53,6 +54,7 @@ export function QualityDashboardPage() {
   const { t, locale } = useLocale();
   const isDark = useIsDarkMode();
   const ink = isDark ? CHART_INK_DARK : CHART_INK_LIGHT;
+  const [chartsOpen, setChartsOpen] = useState(false);
 
   const [locations, setLocations] = useState<Tables<"locations">[]>([]);
   const [visits, setVisits] = useState<VisitScore[]>([]);
@@ -163,132 +165,153 @@ export function QualityDashboardPage() {
         {t.qualityDashboardTitle}
       </h1>
 
-      {visits.length === 0 ? (
-        <p className="rounded-md border border-zinc-200 p-6 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
-          {t.noAuditDataYet}
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <section className="rounded-md border border-zinc-200 p-4 dark:border-zinc-800">
-            <h2 className="mb-3 text-lg font-semibold">
-              {t.compareBranchesTitle}
-            </h2>
-            {compareData.length === 0 ? (
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                {t.noAuditDataYet}
-              </p>
-            ) : (
-              <ResponsiveContainer
-                width="100%"
-                height={Math.max(180, compareData.length * 40)}
-              >
-                <BarChart
-                  data={compareData}
-                  layout="vertical"
-                  margin={{ top: 4, right: 32, bottom: 4, left: 4 }}
-                >
-                  <CartesianGrid horizontal={false} stroke={ink.gridline} />
-                  <XAxis
-                    type="number"
-                    domain={[0, 100]}
-                    ticks={[0, 25, 50, 75, 100]}
-                    tick={{ fill: ink.muted, fontSize: 12 }}
-                    stroke={ink.baseline}
-                  />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    width={110}
-                    tick={{ fill: ink.secondary, fontSize: 12 }}
-                    stroke={ink.baseline}
-                  />
-                  <Tooltip
-                    formatter={(value) => [`${value}%`, t.avgScoreLabel]}
-                    contentStyle={{
-                      background: isDark ? "#1a1a19" : "#fcfcfb",
-                      border: `1px solid ${ink.gridline}`,
-                      color: ink.primary,
-                      fontSize: 12,
-                    }}
-                  />
-                  <Bar dataKey="avgPct" barSize={20} radius={[0, 4, 4, 0]}>
-                    {compareData.map((entry) => (
-                      <Cell
-                        key={entry.locationId}
-                        fill={statusColorForPct(entry.avgPct)}
-                      />
-                    ))}
-                    <LabelList
-                      dataKey="avgPct"
-                      position="right"
-                      formatter={(value) => `${value}%`}
-                      style={{ fill: ink.primary, fontSize: 12 }}
-                    />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </section>
-
-          <section className="rounded-md border border-zinc-200 p-4 dark:border-zinc-800">
-            <h2 className="mb-3 text-lg font-semibold">{t.scoreTrendTitle}</h2>
-            {trendData.length === 0 ? (
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                {t.noAuditDataYet}
-              </p>
-            ) : (
-              <ResponsiveContainer width="100%" height={280}>
-                <LineChart
-                  data={trendData}
-                  margin={{ top: 4, right: 16, bottom: 4, left: 4 }}
-                >
-                  <CartesianGrid stroke={ink.gridline} />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fill: ink.muted, fontSize: 11 }}
-                    stroke={ink.baseline}
-                  />
-                  <YAxis
-                    domain={[0, 100]}
-                    ticks={[0, 25, 50, 75, 100]}
-                    tick={{ fill: ink.muted, fontSize: 12 }}
-                    stroke={ink.baseline}
+      <section className="rounded-md border border-zinc-200 dark:border-zinc-800">
+        <button
+          type="button"
+          onClick={() => setChartsOpen((open) => !open)}
+          aria-expanded={chartsOpen}
+          className="flex w-full items-center justify-between gap-2 p-4 text-start"
+        >
+          <span className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4 shrink-0 text-zinc-500" />
+            <span className="text-lg font-semibold">
+              {t.graphicDashboardTitle}
+            </span>
+          </span>
+          <ChevronDown
+            className={`h-4 w-4 shrink-0 transition-transform ${chartsOpen ? "rotate-180" : ""}`}
+          />
+        </button>
+        {chartsOpen &&
+          (visits.length === 0 ? (
+            <p className="border-t border-zinc-200 p-4 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+              {t.noAuditDataYet}
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 border-t border-zinc-200 p-4 lg:grid-cols-2 dark:border-zinc-800">
+              <section className="rounded-md border border-zinc-200 p-4 dark:border-zinc-800">
+                <h2 className="mb-3 text-lg font-semibold">
+                  {t.compareBranchesTitle}
+                </h2>
+                {compareData.length === 0 ? (
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    {t.noAuditDataYet}
+                  </p>
+                ) : (
+                  <ResponsiveContainer
+                    width="100%"
+                    height={Math.max(180, compareData.length * 40)}
                   >
-                    <Label
-                      value="%"
-                      position="insideTopLeft"
-                      fill={ink.muted}
-                      fontSize={11}
-                    />
-                  </YAxis>
-                  <Tooltip
-                    contentStyle={{
-                      background: isDark ? "#1a1a19" : "#fcfcfb",
-                      border: `1px solid ${ink.gridline}`,
-                      color: ink.primary,
-                      fontSize: 12,
-                    }}
-                  />
-                  <Legend
-                    wrapperStyle={{ fontSize: 12, color: ink.secondary }}
-                  />
-                  {trendLocations.map((loc, index) => (
-                    <Line
-                      key={loc.id}
-                      dataKey={loc.id}
-                      name={locale === "ar" ? loc.name_ar : loc.name_en}
-                      stroke={categoricalColor(index, isDark)}
-                      strokeWidth={2}
-                      dot={{ r: 4 }}
-                      connectNulls
-                    />
-                  ))}
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-          </section>
-        </div>
-      )}
+                    <BarChart
+                      data={compareData}
+                      layout="vertical"
+                      margin={{ top: 4, right: 32, bottom: 4, left: 4 }}
+                    >
+                      <CartesianGrid horizontal={false} stroke={ink.gridline} />
+                      <XAxis
+                        type="number"
+                        domain={[0, 100]}
+                        ticks={[0, 25, 50, 75, 100]}
+                        tick={{ fill: ink.muted, fontSize: 12 }}
+                        stroke={ink.baseline}
+                      />
+                      <YAxis
+                        type="category"
+                        dataKey="name"
+                        width={110}
+                        tick={{ fill: ink.secondary, fontSize: 12 }}
+                        stroke={ink.baseline}
+                      />
+                      <Tooltip
+                        formatter={(value) => [`${value}%`, t.avgScoreLabel]}
+                        contentStyle={{
+                          background: isDark ? "#1a1a19" : "#fcfcfb",
+                          border: `1px solid ${ink.gridline}`,
+                          color: ink.primary,
+                          fontSize: 12,
+                        }}
+                      />
+                      <Bar dataKey="avgPct" barSize={20} radius={[0, 4, 4, 0]}>
+                        {compareData.map((entry) => (
+                          <Cell
+                            key={entry.locationId}
+                            fill={statusColorForPct(entry.avgPct)}
+                          />
+                        ))}
+                        <LabelList
+                          dataKey="avgPct"
+                          position="right"
+                          formatter={(value) => `${value}%`}
+                          style={{ fill: ink.primary, fontSize: 12 }}
+                        />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </section>
+
+              <section className="rounded-md border border-zinc-200 p-4 dark:border-zinc-800">
+                <h2 className="mb-3 text-lg font-semibold">
+                  {t.scoreTrendTitle}
+                </h2>
+                {trendData.length === 0 ? (
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    {t.noAuditDataYet}
+                  </p>
+                ) : (
+                  <ResponsiveContainer width="100%" height={280}>
+                    <LineChart
+                      data={trendData}
+                      margin={{ top: 4, right: 16, bottom: 4, left: 4 }}
+                    >
+                      <CartesianGrid stroke={ink.gridline} />
+                      <XAxis
+                        dataKey="date"
+                        tick={{ fill: ink.muted, fontSize: 11 }}
+                        stroke={ink.baseline}
+                      />
+                      <YAxis
+                        domain={[0, 100]}
+                        ticks={[0, 25, 50, 75, 100]}
+                        tick={{ fill: ink.muted, fontSize: 12 }}
+                        stroke={ink.baseline}
+                      >
+                        <Label
+                          value="%"
+                          position="insideTopLeft"
+                          fill={ink.muted}
+                          fontSize={11}
+                        />
+                      </YAxis>
+                      <Tooltip
+                        contentStyle={{
+                          background: isDark ? "#1a1a19" : "#fcfcfb",
+                          border: `1px solid ${ink.gridline}`,
+                          color: ink.primary,
+                          fontSize: 12,
+                        }}
+                      />
+                      <Legend
+                        wrapperStyle={{ fontSize: 12, color: ink.secondary }}
+                      />
+                      {trendLocations.map((loc, index) => (
+                        <Line
+                          key={loc.id}
+                          dataKey={loc.id}
+                          name={locale === "ar" ? loc.name_ar : loc.name_en}
+                          stroke={categoricalColor(index, isDark)}
+                          strokeWidth={2}
+                          dot={{ r: 4 }}
+                          connectNulls
+                        />
+                      ))}
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
+              </section>
+            </div>
+          ))}
+      </section>
 
       <div className="overflow-x-auto rounded-md border border-zinc-200 dark:border-zinc-800">
         <table className="w-full min-w-max text-sm">
