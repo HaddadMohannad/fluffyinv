@@ -1,11 +1,17 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router";
 import { ChefHat, ChevronDown, MapPin, LogOut, Menu, X } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
 import { useActiveLocation } from "@/lib/location/LocationContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
-import { NAV_ITEMS, roleDefaultHrefs, type NavItem } from "@/lib/navigation";
+import {
+  NAV_GROUPS,
+  NAV_ITEMS,
+  groupNavItems,
+  roleDefaultHrefs,
+  type NavItem,
+} from "@/lib/navigation";
 import { supabase } from "@/lib/supabase/client";
 
 function initialsOf(name: string | null | undefined) {
@@ -17,6 +23,118 @@ function initialsOf(name: string | null | undefined) {
       .slice(0, 2)
       .map((w) => w[0]?.toUpperCase())
       .join("") || "?"
+  );
+}
+
+function NavList({
+  items,
+  activePath,
+  onNavigate,
+}: {
+  items: NavItem[];
+  activePath: string;
+  onNavigate?: () => void;
+}) {
+  const { t } = useLocale();
+  const nodes = useMemo(() => groupNavItems(items), [items]);
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
+
+  // Keep the group containing the current page expanded, so a reload or
+  // a direct link doesn't leave you inside a group with no visible cue
+  // of where you are.
+  useEffect(() => {
+    const activeGroup = NAV_GROUPS.find((g) => g.hrefs.includes(activePath));
+    if (!activeGroup) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- recovering the expanded state a route change implies (the group containing the new active page should read as open)
+    setExpanded((prev) =>
+      prev.has(activeGroup.key) ? prev : new Set(prev).add(activeGroup.key)
+    );
+  }, [activePath]);
+
+  function toggleGroup(key: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  return (
+    <ul className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
+      {nodes.map((node) => {
+        if (node.kind === "item") {
+          const isActive = activePath === node.item.href;
+          const Icon = node.item.icon;
+          return (
+            <li key={node.item.href}>
+              <Link
+                to={node.item.href}
+                onClick={onNavigate}
+                className={`flex h-11 items-center gap-3 rounded-md px-3 text-sm font-medium ${
+                  isActive
+                    ? "bg-fluffy-orange text-white"
+                    : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                }`}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="truncate">{t[node.item.labelKey]}</span>
+              </Link>
+            </li>
+          );
+        }
+
+        const isOpen = expanded.has(node.group.key);
+        const hasActiveChild = node.items.some((i) => i.href === activePath);
+        const GroupIcon = node.group.icon;
+        return (
+          <li key={node.group.key}>
+            <button
+              type="button"
+              onClick={() => toggleGroup(node.group.key)}
+              aria-expanded={isOpen}
+              className={`flex h-11 w-full items-center gap-3 rounded-md px-3 text-sm font-medium ${
+                hasActiveChild && !isOpen
+                  ? "text-fluffy-orange bg-orange-50 dark:bg-orange-950"
+                  : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+              }`}
+            >
+              <GroupIcon className="h-4 w-4 shrink-0" />
+              <span className="flex-1 truncate text-start">
+                {t[node.group.labelKey]}
+              </span>
+              <ChevronDown
+                className={`h-4 w-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+            {isOpen && (
+              <ul className="mt-1 flex flex-col gap-1 ps-4">
+                {node.items.map((item) => {
+                  const isActive = activePath === item.href;
+                  const Icon = item.icon;
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        to={item.href}
+                        onClick={onNavigate}
+                        className={`flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium ${
+                          isActive
+                            ? "bg-fluffy-orange text-white"
+                            : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                        }`}
+                      >
+                        <Icon className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">{t[item.labelKey]}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
@@ -93,27 +211,7 @@ export function AppShell({
               {t.appName}
             </span>
           </div>
-          <ul className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
-            {visibleItems.map((item) => {
-              const isActive = routerLocation.pathname === item.href;
-              const Icon = item.icon;
-              return (
-                <li key={item.href}>
-                  <Link
-                    to={item.href}
-                    className={`flex h-11 items-center gap-3 rounded-md px-3 text-sm font-medium ${
-                      isActive
-                        ? "bg-fluffy-orange text-white"
-                        : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
-                    }`}
-                  >
-                    <Icon className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{t[item.labelKey]}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+          <NavList items={visibleItems} activePath={routerLocation.pathname} />
         </nav>
 
         <div className="flex flex-1 flex-col">
@@ -243,28 +341,7 @@ function MobileDrawer({
             <X className="h-5 w-5" />
           </button>
         </div>
-        <ul className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
-          {items.map((item) => {
-            const isActive = activePath === item.href;
-            const Icon = item.icon;
-            return (
-              <li key={item.href}>
-                <Link
-                  to={item.href}
-                  onClick={onClose}
-                  className={`flex h-11 items-center gap-3 rounded-md px-3 text-sm font-medium ${
-                    isActive
-                      ? "bg-fluffy-orange text-white"
-                      : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
-                  }`}
-                >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{t[item.labelKey]}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        <NavList items={items} activePath={activePath} onNavigate={onClose} />
         <div className="shrink-0 border-t border-zinc-200 p-3 dark:border-zinc-800">
           <LanguageToggle />
         </div>

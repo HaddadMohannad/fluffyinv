@@ -473,6 +473,10 @@ export const dictionary = {
     deleteVisit: "Delete visit",
     confirmDeleteVisit: "Delete this visit? This cannot be undone.",
     confirmDeleteValue: "Yes, delete",
+    auditGroupLabel: "Quality Audits",
+    inventoryGroupLabel: "Inventory Operations",
+    financeGroupLabel: "Finance",
+    adminGroupLabel: "Administration",
   },
   ar: {
     appName: "فلافي - المخزون",
@@ -946,6 +950,10 @@ export const dictionary = {
     confirmDeleteVisit:
       "هل تريد حذف هذه الزيارة؟ لا يمكن التراجع عن هذا الإجراء.",
     confirmDeleteValue: "نعم، احذف",
+    auditGroupLabel: "تدقيق الجودة",
+    inventoryGroupLabel: "عمليات المخزون",
+    financeGroupLabel: "الشؤون المالية",
+    adminGroupLabel: "الإدارة",
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 
