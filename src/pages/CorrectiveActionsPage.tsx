@@ -43,6 +43,7 @@ export function CorrectiveActionsPage() {
   const [locationId, setLocationId] = useState("");
   const [actions, setActions] = useState<Tables<"corrective_actions">[]>([]);
   const [statusFilter, setStatusFilter] = useState<Status | "all">("all");
+  const [filterToVisit, setFilterToVisit] = useState(Boolean(visitIdFromLink));
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,13 +66,17 @@ export function CorrectiveActionsPage() {
       setActions([]);
       return;
     }
-    supabase
+    let query = supabase
       .from("corrective_actions")
       .select("*")
-      .eq("location_id", locationId)
+      .eq("location_id", locationId);
+    if (filterToVisit && visitIdFromLink) {
+      query = query.eq("visit_id", visitIdFromLink);
+    }
+    query
       .order("due_date", { ascending: true, nullsFirst: false })
       .then(({ data }) => setActions(data ?? []));
-  }, [locationId, refreshKey]);
+  }, [locationId, refreshKey, filterToVisit, visitIdFromLink]);
 
   const filteredActions = useMemo(() => {
     if (statusFilter === "all") return actions;
@@ -193,6 +198,19 @@ export function CorrectiveActionsPage() {
           <option value="closed">{t.statusClosed}</option>
         </select>
       </label>
+
+      {filterToVisit && visitIdFromLink && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-zinc-200 bg-zinc-50 p-3 text-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <span>{t.showingActionsForVisit}</span>
+          <button
+            type="button"
+            onClick={() => setFilterToVisit(false)}
+            className="text-fluffy-orange font-medium"
+          >
+            {t.showAllActionsLink}
+          </button>
+        </div>
+      )}
 
       <div className="overflow-x-auto rounded-md border border-zinc-200 dark:border-zinc-800">
         <table className="w-full min-w-max text-sm">
