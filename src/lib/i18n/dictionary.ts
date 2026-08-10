@@ -411,6 +411,7 @@ export const dictionary = {
     needsInterventionCountLabel: "Needs intervention",
     openActionsCountLabel: "Open actions",
     recentVisitsTitle: "Recent visits",
+    graphicDashboardTitle: "Graphic Dashboard",
     compareBranchesTitle: "Compare branches",
     scoreTrendTitle: "Score trend over time",
     noAuditDataYet:
@@ -886,6 +887,7 @@ export const dictionary = {
     needsInterventionCountLabel: "يحتاج تدخل إداري",
     openActionsCountLabel: "إجراءات مفتوحة",
     recentVisitsTitle: "الزيارات الأخيرة",
+    graphicDashboardTitle: "لوحة الرسوم البيانية",
     compareBranchesTitle: "مقارنة الفروع",
     scoreTrendTitle: "اتجاه النتيجة عبر الزمن",
     noAuditDataYet:
