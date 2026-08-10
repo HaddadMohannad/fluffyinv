@@ -46,6 +46,198 @@ export type Database = {
           },
         ];
       };
+      audit_categories: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          id: string;
+          name: string;
+          sort_order: number;
+        };
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          name: string;
+          sort_order?: number;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          name?: string;
+          sort_order?: number;
+        };
+        Relationships: [];
+      };
+      audit_item_scores: {
+        Row: {
+          created_at: string;
+          evidence_urls: string[] | null;
+          id: string;
+          item_id: string;
+          note: string | null;
+          score: number | null;
+          visit_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          evidence_urls?: string[] | null;
+          id?: string;
+          item_id: string;
+          note?: string | null;
+          score?: number | null;
+          visit_id: string;
+        };
+        Update: {
+          created_at?: string;
+          evidence_urls?: string[] | null;
+          id?: string;
+          item_id?: string;
+          note?: string | null;
+          score?: number | null;
+          visit_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "audit_item_scores_item_id_fkey";
+            columns: ["item_id"];
+            isOneToOne: false;
+            referencedRelation: "audit_items";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "audit_item_scores_visit_id_fkey";
+            columns: ["visit_id"];
+            isOneToOne: false;
+            referencedRelation: "audit_visits";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "audit_item_scores_visit_id_fkey";
+            columns: ["visit_id"];
+            isOneToOne: false;
+            referencedRelation: "v_audit_visit_scores";
+            referencedColumns: ["visit_id"];
+          },
+        ];
+      };
+      audit_items: {
+        Row: {
+          active: boolean;
+          category_id: string;
+          created_at: string;
+          definition: string | null;
+          id: string;
+          label: string;
+          sort_order: number;
+        };
+        Insert: {
+          active?: boolean;
+          category_id: string;
+          created_at?: string;
+          definition?: string | null;
+          id?: string;
+          label: string;
+          sort_order?: number;
+        };
+        Update: {
+          active?: boolean;
+          category_id?: string;
+          created_at?: string;
+          definition?: string | null;
+          id?: string;
+          label?: string;
+          sort_order?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "audit_items_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "audit_categories";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      audit_location_grants: {
+        Row: {
+          created_at: string;
+          id: string;
+          location_id: string;
+          profile_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          location_id: string;
+          profile_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          location_id?: string;
+          profile_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "audit_location_grants_location_id_fkey";
+            columns: ["location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "audit_location_grants_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      audit_visits: {
+        Row: {
+          auditor_id: string | null;
+          created_at: string;
+          id: string;
+          location_id: string;
+          notes: string | null;
+          visit_date: string;
+        };
+        Insert: {
+          auditor_id?: string | null;
+          created_at?: string;
+          id?: string;
+          location_id: string;
+          notes?: string | null;
+          visit_date?: string;
+        };
+        Update: {
+          auditor_id?: string | null;
+          created_at?: string;
+          id?: string;
+          location_id?: string;
+          notes?: string | null;
+          visit_date?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "audit_visits_auditor_id_fkey";
+            columns: ["auditor_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "audit_visits_location_id_fkey";
+            columns: ["location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       cash_counts: {
         Row: {
           count_date: string;
@@ -82,6 +274,96 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "locations";
             referencedColumns: ["id"];
+          },
+        ];
+      };
+      corrective_actions: {
+        Row: {
+          action_required: string | null;
+          actual_cost: number | null;
+          created_at: string;
+          created_by: string | null;
+          description: string;
+          due_date: string | null;
+          estimated_cost: number | null;
+          id: string;
+          item_id: string | null;
+          location_id: string;
+          owner: string | null;
+          recheck_date: string | null;
+          recheck_result: string | null;
+          status: string;
+          visit_id: string | null;
+        };
+        Insert: {
+          action_required?: string | null;
+          actual_cost?: number | null;
+          created_at?: string;
+          created_by?: string | null;
+          description: string;
+          due_date?: string | null;
+          estimated_cost?: number | null;
+          id?: string;
+          item_id?: string | null;
+          location_id: string;
+          owner?: string | null;
+          recheck_date?: string | null;
+          recheck_result?: string | null;
+          status?: string;
+          visit_id?: string | null;
+        };
+        Update: {
+          action_required?: string | null;
+          actual_cost?: number | null;
+          created_at?: string;
+          created_by?: string | null;
+          description?: string;
+          due_date?: string | null;
+          estimated_cost?: number | null;
+          id?: string;
+          item_id?: string | null;
+          location_id?: string;
+          owner?: string | null;
+          recheck_date?: string | null;
+          recheck_result?: string | null;
+          status?: string;
+          visit_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "corrective_actions_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "corrective_actions_item_id_fkey";
+            columns: ["item_id"];
+            isOneToOne: false;
+            referencedRelation: "audit_items";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "corrective_actions_location_id_fkey";
+            columns: ["location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "corrective_actions_visit_id_fkey";
+            columns: ["visit_id"];
+            isOneToOne: false;
+            referencedRelation: "audit_visits";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "corrective_actions_visit_id_fkey";
+            columns: ["visit_id"];
+            isOneToOne: false;
+            referencedRelation: "v_audit_visit_scores";
+            referencedColumns: ["visit_id"];
           },
         ];
       };
@@ -774,10 +1056,34 @@ export type Database = {
         };
         Relationships: [];
       };
+      profile_module_grants: {
+        Row: {
+          module_href: string;
+          profile_id: string;
+        };
+        Insert: {
+          module_href: string;
+          profile_id: string;
+        };
+        Update: {
+          module_href?: string;
+          profile_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "profile_module_grants_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       profiles: {
         Row: {
           active: boolean;
           created_at: string;
+          email: string | null;
           full_name: string;
           id: string;
           location_id: string | null;
@@ -786,6 +1092,7 @@ export type Database = {
         Insert: {
           active?: boolean;
           created_at?: string;
+          email?: string | null;
           full_name: string;
           id: string;
           location_id?: string | null;
@@ -794,6 +1101,7 @@ export type Database = {
         Update: {
           active?: boolean;
           created_at?: string;
+          email?: string | null;
           full_name?: string;
           id?: string;
           location_id?: string | null;
@@ -943,6 +1251,57 @@ export type Database = {
             columns: ["location_id"];
             isOneToOne: false;
             referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      signup_requests: {
+        Row: {
+          assigned_location_id: string | null;
+          assigned_role: Database["public"]["Enums"]["user_role"] | null;
+          decided_at: string | null;
+          decided_by: string | null;
+          email: string;
+          full_name: string | null;
+          id: string;
+          requested_at: string;
+          status: string;
+        };
+        Insert: {
+          assigned_location_id?: string | null;
+          assigned_role?: Database["public"]["Enums"]["user_role"] | null;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          email: string;
+          full_name?: string | null;
+          id: string;
+          requested_at?: string;
+          status?: string;
+        };
+        Update: {
+          assigned_location_id?: string | null;
+          assigned_role?: Database["public"]["Enums"]["user_role"] | null;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          email?: string;
+          full_name?: string | null;
+          id?: string;
+          requested_at?: string;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "signup_requests_assigned_location_id_fkey";
+            columns: ["assigned_location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "signup_requests_decided_by_fkey";
+            columns: ["decided_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
         ];
@@ -1364,6 +1723,36 @@ export type Database = {
       };
     };
     Views: {
+      v_audit_visit_scores: {
+        Row: {
+          auditor_id: string | null;
+          classification: string | null;
+          items_failed: number | null;
+          items_passed: number | null;
+          items_scored: number | null;
+          location_id: string | null;
+          notes: string | null;
+          overall_pct: number | null;
+          visit_date: string | null;
+          visit_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "audit_visits_auditor_id_fkey";
+            columns: ["auditor_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "audit_visits_location_id_fkey";
+            columns: ["location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       v_current_stock: {
         Row: {
           location_id: string | null;
@@ -1458,11 +1847,31 @@ export type Database = {
           },
         ];
       };
+      v_user_activity_log: {
+        Row: {
+          action: string | null;
+          actor_id: string | null;
+          created_at: string | null;
+          detail: string | null;
+          location_id: string | null;
+          record_id: string | null;
+          source_table: string | null;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
       apply_product_alias: {
         Args: { p_product_id: string; p_raw_name: string };
         Returns: number;
+      };
+      approve_signup_request: {
+        Args: {
+          p_location_id?: string;
+          p_request_id: string;
+          p_role: Database["public"]["Enums"]["user_role"];
+        };
+        Returns: undefined;
       };
       approve_stocktake: {
         Args: { p_stocktake_id: string };
@@ -1490,6 +1899,7 @@ export type Database = {
         Returns: string;
       };
       delete_all_business_data: { Args: never; Returns: Json };
+      delete_audit_visit: { Args: { p_visit_id: string }; Returns: undefined };
       get_daily_closing_report: {
         Args: { p_close_date: string; p_location_id: string };
         Returns: {
@@ -1513,6 +1923,10 @@ export type Database = {
           threshold_value: number;
         }[];
       };
+      has_audit_location_access: {
+        Args: { p_location_id: string };
+        Returns: boolean;
+      };
       my_location: { Args: never; Returns: string };
       my_role: {
         Args: never;
@@ -1531,6 +1945,15 @@ export type Database = {
           new_avg_cost: number;
           new_qty: number;
         }[];
+      };
+      record_audit_visit: {
+        Args: {
+          p_location_id: string;
+          p_notes?: string;
+          p_scores?: Json;
+          p_visit_date?: string;
+        };
+        Returns: string;
       };
       record_hospitality: {
         Args: {
@@ -1595,6 +2018,10 @@ export type Database = {
           value_lost: number;
         }[];
       };
+      reject_signup_request: {
+        Args: { p_request_id: string };
+        Returns: undefined;
+      };
       reopen_day: {
         Args: { p_close_date: string; p_location_id: string; p_reason: string };
         Returns: undefined;
@@ -1624,6 +2051,15 @@ export type Database = {
         Args: { p_stocktake_id: string };
         Returns: undefined;
       };
+      update_audit_visit: {
+        Args: {
+          p_notes?: string;
+          p_scores?: Json;
+          p_visit_date?: string;
+          p_visit_id: string;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       hospitality_type: "vip" | "complaint" | "staff";
@@ -1647,7 +2083,12 @@ export type Database = {
       sales_source: "foodics" | "talabat" | "careem" | "manual" | "pos";
       stocktake_status: "draft" | "submitted" | "approved";
       transfer_status: "pending" | "completed" | "cancelled";
-      user_role: "admin" | "branch_manager" | "warehouse_staff" | "accountant";
+      user_role:
+        | "admin"
+        | "branch_manager"
+        | "warehouse_staff"
+        | "accountant"
+        | "inspector";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -1797,7 +2238,13 @@ export const Constants = {
       sales_source: ["foodics", "talabat", "careem", "manual", "pos"],
       stocktake_status: ["draft", "submitted", "approved"],
       transfer_status: ["pending", "completed", "cancelled"],
-      user_role: ["admin", "branch_manager", "warehouse_staff", "accountant"],
+      user_role: [
+        "admin",
+        "branch_manager",
+        "warehouse_staff",
+        "accountant",
+        "inspector",
+      ],
     },
   },
 } as const;
