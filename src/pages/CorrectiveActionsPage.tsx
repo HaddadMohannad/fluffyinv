@@ -42,6 +42,9 @@ export function CorrectiveActionsPage() {
 
   const [locationId, setLocationId] = useState("");
   const [actions, setActions] = useState<Tables<"corrective_actions">[]>([]);
+  const [auditContext, setAuditContext] = useState<
+    Record<string, Pick<Tables<"audit_item_scores">, "note" | "evidence_urls">>
+  >({});
   const [statusFilter, setStatusFilter] = useState<Status | "all">("all");
   const [filterToVisit, setFilterToVisit] = useState(Boolean(visitIdFromLink));
   const [form, setForm] = useState(emptyForm);
@@ -77,6 +80,51 @@ export function CorrectiveActionsPage() {
       .order("due_date", { ascending: true, nullsFirst: false })
       .then(({ data }) => setActions(data ?? []));
   }, [locationId, refreshKey, filterToVisit, visitIdFromLink]);
+
+  // Corrective actions auto-created from a failed audit item don't carry
+  // the note/evidence captured at audit time (those live on
+  // audit_item_scores, not corrective_actions) — pull them in so the
+  // person completing the action can see why it failed without leaving
+  // this page.
+  useEffect(() => {
+    const linked = actions.filter((a) => a.visit_id && a.item_id);
+    if (linked.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clearing derived state when there's nothing to look up
+      setAuditContext({});
+      return;
+    }
+    const visitIds = Array.from(
+      new Set(linked.map((a) => a.visit_id as string))
+    );
+    supabase
+      .from("audit_item_scores")
+      .select("visit_id, item_id, note, evidence_urls")
+      .in("visit_id", visitIds)
+      .then(({ data }) => {
+        const map: Record<
+          string,
+          Pick<Tables<"audit_item_scores">, "note" | "evidence_urls">
+        > = {};
+        for (const row of data ?? []) {
+          map[`${row.visit_id}:${row.item_id}`] = {
+            note: row.note,
+            evidence_urls: row.evidence_urls,
+          };
+        }
+        setAuditContext(map);
+      });
+  }, [actions]);
+
+  async function handleViewEvidence(path: string) {
+    const { data, error: signError } = await supabase.storage
+      .from("audit-evidence")
+      .createSignedUrl(path, 60);
+    if (signError || !data) {
+      console.error("Sign evidence URL failed:", signError);
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  }
 
   const filteredActions = useMemo(() => {
     if (statusFilter === "all") return actions;
@@ -230,12 +278,38 @@ export function CorrectiveActionsPage() {
                 action.due_date &&
                 action.due_date < today &&
                 action.status !== "closed";
+              const context =
+                action.visit_id && action.item_id
+                  ? auditContext[`${action.visit_id}:${action.item_id}`]
+                  : undefined;
               return (
                 <tr
                   key={action.id}
                   className="border-t border-zinc-100 dark:border-zinc-800"
                 >
-                  <td className="max-w-xs p-2">{action.description}</td>
+                  <td className="max-w-xs p-2">
+                    <p>{action.description}</p>
+                    {context?.note && (
+                      <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                        {t.auditNoteLabel}: {context.note}
+                      </p>
+                    )}
+                    {context?.evidence_urls &&
+                      context.evidence_urls.length > 0 && (
+                        <div className="mt-1 flex flex-wrap gap-2">
+                          {context.evidence_urls.map((path) => (
+                            <button
+                              key={path}
+                              type="button"
+                              onClick={() => handleViewEvidence(path)}
+                              className="text-fluffy-orange text-xs font-medium"
+                            >
+                              {t.evidenceAttached}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                  </td>
                   <td className="p-2">{action.owner}</td>
                   <td
                     className={`p-2 ${overdue ? "font-semibold text-red-600" : ""}`}
