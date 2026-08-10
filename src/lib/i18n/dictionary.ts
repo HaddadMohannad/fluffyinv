@@ -465,6 +465,7 @@ export const dictionary = {
     showAllActionsLink: "Show all for this branch",
     visitNotFound: "Visit not found.",
     visitDetailsTitle: "Visit Details",
+    auditNoteLabel: "Audit note",
   },
   ar: {
     appName: "فلافي - المخزون",
@@ -929,6 +930,7 @@ export const dictionary = {
     showAllActionsLink: "عرض كل إجراءات هذا الفرع",
     visitNotFound: "الزيارة غير موجودة.",
     visitDetailsTitle: "تفاصيل الزيارة",
+    auditNoteLabel: "ملاحظة التدقيق",
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 
