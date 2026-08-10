@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router";
 import { useLocale } from "@/lib/i18n/LocaleContext";
 import { supabase } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
@@ -159,12 +160,31 @@ export function QualityDashboardPage() {
               {recentVisits.map((v) => (
                 <tr
                   key={v.visit_id}
-                  className="border-t border-zinc-100 dark:border-zinc-800"
+                  className="border-t border-zinc-100 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900"
                 >
-                  <td className="p-2">{v.visit_date}</td>
-                  <td className="p-2">{locationName(v.location_id ?? "")}</td>
-                  <td className="p-2 text-end">
-                    {v.overall_pct !== null ? `${v.overall_pct}%` : "—"}
+                  <td className="p-0">
+                    <Link
+                      to={`/audit-visit/${v.visit_id}`}
+                      className="flex p-2"
+                    >
+                      {v.visit_date}
+                    </Link>
+                  </td>
+                  <td className="p-0">
+                    <Link
+                      to={`/audit-visit/${v.visit_id}`}
+                      className="flex p-2"
+                    >
+                      {locationName(v.location_id ?? "")}
+                    </Link>
+                  </td>
+                  <td className="p-0">
+                    <Link
+                      to={`/audit-visit/${v.visit_id}`}
+                      className="flex justify-end p-2"
+                    >
+                      {v.overall_pct !== null ? `${v.overall_pct}%` : "—"}
+                    </Link>
                   </td>
                   <td className="p-2 text-center">
                     {v.classification && (

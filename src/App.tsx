@@ -20,6 +20,7 @@ import { AuditEntryPage } from "@/pages/AuditEntryPage";
 import { CorrectiveActionsPage } from "@/pages/CorrectiveActionsPage";
 import { QualityDashboardPage } from "@/pages/QualityDashboardPage";
 import { AuditAccessPage } from "@/pages/AuditAccessPage";
+import { VisitDetailPage } from "@/pages/VisitDetailPage";
 import { InventoryPage } from "@/pages/InventoryPage";
 import { ProductionPage } from "@/pages/ProductionPage";
 import { DailyClosingPage } from "@/pages/DailyClosingPage";
@@ -164,6 +165,14 @@ export function App() {
           element={
             <AppShell title={t.auditAccessTitle}>
               <AuditAccessPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/audit-visit/:id"
+          element={
+            <AppShell title={t.visitDetailsTitle}>
+              <VisitDetailPage />
             </AppShell>
           }
         />

@@ -379,7 +379,10 @@ export const dictionary = {
     saveVisit: "Save visit",
     auditSavedTitle: "Visit saved",
     failedItemsTitle: "Failed items",
-    logCorrectiveActions: "Log corrective actions for failed items",
+    reviewCorrectiveActions: "Review corrective actions",
+    correctiveActionsAutoCreatedNote:
+      "A corrective action was automatically created for each failed item — review them to assign an owner and due date.",
+    viewVisitDetails: "View visit details",
     startNewVisit: "Start a new visit",
     correctiveActionsTitle: "Corrective Actions",
     statusLabel: "Status",
@@ -450,6 +453,18 @@ export const dictionary = {
     resetModulesToDefault: "Reset to role default",
     moduleVisibilityNote:
       "Controls which tabs this person sees. It doesn't grant extra permissions beyond their role — turning on a module their role can't actually use will show the tab but its actions will still fail.",
+    applyPassAll: "Pass all",
+    applyFailAll: "Fail all",
+    applyNaAll: "N/A all",
+    attachEvidence: "Attach evidence",
+    uploadingEvidence: "Uploading…",
+    evidenceAttached: "Evidence",
+    draftRestoredNote: "Restored an unsaved audit from earlier on this device.",
+    discardDraft: "Discard draft",
+    showingActionsForVisit: "Showing corrective actions for this visit.",
+    showAllActionsLink: "Show all for this branch",
+    visitNotFound: "Visit not found.",
+    visitDetailsTitle: "Visit Details",
   },
   ar: {
     appName: "فلافي - المخزون",
@@ -828,7 +843,10 @@ export const dictionary = {
     saveVisit: "حفظ الزيارة",
     auditSavedTitle: "تم حفظ الزيارة",
     failedItemsTitle: "البنود غير المطابقة",
-    logCorrectiveActions: "تسجيل إجراءات تصحيحية للبنود غير المطابقة",
+    reviewCorrectiveActions: "مراجعة الإجراءات التصحيحية",
+    correctiveActionsAutoCreatedNote:
+      "تم إنشاء إجراء تصحيحي تلقائيًا لكل بند غير مطابق — راجعها لتحديد المسؤول والموعد النهائي.",
+    viewVisitDetails: "عرض تفاصيل الزيارة",
     startNewVisit: "بدء زيارة جديدة",
     correctiveActionsTitle: "الإجراءات التصحيحية",
     statusLabel: "الحالة",
@@ -898,6 +916,19 @@ export const dictionary = {
     resetModulesToDefault: "إعادة الضبط لصلاحيات الدور",
     moduleVisibilityNote:
       "يتحكم فقط بالأقسام التي تظهر لهذا الشخص. لا يمنحه صلاحيات إضافية تتجاوز دوره — تفعيل قسم لا يسمح به دوره سيُظهر التبويب لكن الإجراءات بداخله ستبقى مرفوضة.",
+    applyPassAll: "اجتياز الكل",
+    applyFailAll: "رسوب الكل",
+    applyNaAll: "لا ينطبق للكل",
+    attachEvidence: "إرفاق دليل",
+    uploadingEvidence: "جارٍ الرفع…",
+    evidenceAttached: "دليل مرفق",
+    draftRestoredNote:
+      "تمت استعادة تدقيق غير محفوظ من وقت سابق على هذا الجهاز.",
+    discardDraft: "تجاهل المسودة",
+    showingActionsForVisit: "يتم عرض الإجراءات التصحيحية لهذه الزيارة فقط.",
+    showAllActionsLink: "عرض كل إجراءات هذا الفرع",
+    visitNotFound: "الزيارة غير موجودة.",
+    visitDetailsTitle: "تفاصيل الزيارة",
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 
