@@ -411,6 +411,10 @@ export const dictionary = {
     needsInterventionCountLabel: "Needs intervention",
     openActionsCountLabel: "Open actions",
     recentVisitsTitle: "Recent visits",
+    compareBranchesTitle: "Compare branches",
+    scoreTrendTitle: "Score trend over time",
+    noAuditDataYet:
+      "No audit visits recorded yet — charts will appear once branches start logging visits.",
     auditAccessTitle: "Audit Access",
     noBranchManagersYet: "No branch managers yet.",
     managerLabel: "Manager",
@@ -875,6 +879,10 @@ export const dictionary = {
     needsInterventionCountLabel: "يحتاج تدخل إداري",
     openActionsCountLabel: "إجراءات مفتوحة",
     recentVisitsTitle: "الزيارات الأخيرة",
+    compareBranchesTitle: "مقارنة الفروع",
+    scoreTrendTitle: "اتجاه النتيجة عبر الزمن",
+    noAuditDataYet:
+      "لا توجد زيارات تدقيق مسجلة بعد — ستظهر الرسوم البيانية بمجرد أن تبدأ الفروع بتسجيل الزيارات.",
     auditAccessTitle: "صلاحيات التدقيق",
     noBranchManagersYet: "لا يوجد مدراء فروع بعد.",
     managerLabel: "المدير",
