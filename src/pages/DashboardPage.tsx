@@ -1,12 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
-import { Boxes, Heart, ShoppingCart, Trash2 } from "lucide-react";
+import { Link } from "react-router";
+import { Boxes, ClipboardCheck, Heart, ShoppingCart, Trash2 } from "lucide-react";
+import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
 import { useActiveLocation } from "@/lib/location/LocationContext";
 import { supabase } from "@/lib/supabase/client";
 import { StatCard } from "@/components/StatCard";
 import { Pill } from "@/components/Pill";
 import { activityTypeTone } from "@/lib/pillColors";
-import type { Tables } from "@/lib/supabase/database.types";
+import type { PillTone } from "@/lib/pillColors";
+import type { Enums, Tables } from "@/lib/supabase/database.types";
+
+type VisitScore = Tables<"v_audit_visit_scores">;
+type CorrectiveAction = Tables<"corrective_actions">;
+
+function classificationTone(classification: string | null): PillTone {
+  if (classification === "ممتاز") return "green";
+  if (classification === "يحتاج تحسين") return "amber";
+  if (classification === "يحتاج تدخل إداري") return "red";
+  return "zinc";
+}
 
 const ACTIVITY_MOVEMENTS = [
   "transfer_in",
@@ -48,8 +61,14 @@ function formatMoney(n: number) {
 }
 
 export function DashboardPage() {
+  const { profile } = useAuth();
   const { t, locale } = useLocale();
   const { locationId, locations } = useActiveLocation();
+
+  const canStartAudit =
+    profile?.role === "admin" ||
+    profile?.role === "branch_manager" ||
+    profile?.role === "inspector";
 
   const [products, setProducts] = useState<Tables<"products">[]>([]);
   const [stockQty, setStockQty] = useState<Record<string, number>>({});
@@ -63,6 +82,11 @@ export function DashboardPage() {
   const [wasteYesterday, setWasteYesterday] = useState(0);
   const [hospitalityToday, setHospitalityToday] = useState(0);
   const [hospitalityYesterday, setHospitalityYesterday] = useState(0);
+  const [salesBySource, setSalesBySource] = useState<
+    { source: Enums<"sales_source">; net: number }[]
+  >([]);
+  const [auditVisits, setAuditVisits] = useState<VisitScore[]>([]);
+  const [openActions, setOpenActions] = useState<CorrectiveAction[]>([]);
 
   useEffect(() => {
     supabase
@@ -166,6 +190,40 @@ export function DashboardPage() {
           (data ?? []).reduce((sum, r) => sum + r.value, 0)
         );
       });
+
+    supabase
+      .from("sales_orders")
+      .select("source, net")
+      .eq("location_id", locationId)
+      .gte("order_date", dateStr(29))
+      .then(({ data }) => {
+        const map = new Map<Enums<"sales_source">, number>();
+        for (const row of data ?? []) {
+          map.set(row.source, (map.get(row.source) ?? 0) + row.net);
+        }
+        setSalesBySource(
+          Array.from(map.entries())
+            .map(([source, net]) => ({ source, net }))
+            .sort((a, b) => b.net - a.net)
+        );
+      });
+
+    supabase
+      .from("v_audit_visit_scores")
+      .select("*")
+      .eq("location_id", locationId)
+      .order("visit_date", { ascending: false })
+      .limit(5)
+      .then(({ data }) => setAuditVisits(data ?? []));
+
+    supabase
+      .from("corrective_actions")
+      .select("*")
+      .eq("location_id", locationId)
+      .neq("status", "closed")
+      .order("due_date", { ascending: true, nullsFirst: false })
+      .limit(5)
+      .then(({ data }) => setOpenActions(data ?? []));
   }, [locationId]);
 
   const avgCostByProduct = useMemo(
@@ -216,6 +274,17 @@ export function DashboardPage() {
     return loc ? (locale === "ar" ? loc.name_ar : loc.name_en) : "";
   }, [locations, locationId, locale]);
 
+  const lowStockProducts = useMemo(
+    () =>
+      products.filter(
+        (p) =>
+          p.active &&
+          p.reorder_threshold !== null &&
+          (stockQty[p.id] ?? 0) < p.reorder_threshold
+      ),
+    [products, stockQty]
+  );
+
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
       <h1 className="text-fluffy-dark text-2xl font-semibold dark:text-zinc-50">
@@ -248,6 +317,151 @@ export function DashboardPage() {
           delta={makeDelta(hospitalityToday, hospitalityYesterday, true)}
         />
       </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <section>
+          <h2 className="mb-2 text-lg font-semibold">
+            {t.salesBySourceTitle}
+          </h2>
+          {salesBySource.length === 0 ? (
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              {t.noResults}
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {salesBySource.map((s) => (
+                <div
+                  key={s.source}
+                  className="flex items-center justify-between rounded-md border border-zinc-200 p-2 text-sm dark:border-zinc-800"
+                >
+                  <span className="capitalize">{s.source}</span>
+                  <span className="font-medium">{formatMoney(s.net)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-lg font-semibold">
+            {t.inventorySnapshotTitle} — {t.lowStockTitle}
+          </h2>
+          {lowStockProducts.length === 0 ? (
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              {t.noLowStockItems}
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {lowStockProducts.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between rounded-md border border-amber-300 bg-amber-50 p-2 text-sm dark:border-amber-800 dark:bg-amber-950/40"
+                >
+                  <span>{locale === "ar" ? p.name_ar : p.name_en}</span>
+                  <span className="font-medium">
+                    {(stockQty[p.id] ?? 0).toFixed(1)} / {p.reorder_threshold}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+
+      <section>
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">{t.branchQualityTitle}</h2>
+          {canStartAudit && (
+            <Link
+              to="/audit-entry"
+              className="bg-fluffy-orange flex h-9 items-center gap-1 rounded-md px-3 text-sm font-medium text-white"
+            >
+              <ClipboardCheck className="h-4 w-4" />
+              {t.startAuditAction}
+            </Link>
+          )}
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+                {t.recentAuditVisitsTitle}
+              </h3>
+              <Link
+                to="/quality-dashboard"
+                className="text-fluffy-orange text-xs font-medium"
+              >
+                {t.viewAllAction}
+              </Link>
+            </div>
+            {auditVisits.length === 0 ? (
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                {t.noRecentAuditVisits}
+              </p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {auditVisits.map((v) => (
+                  <Link
+                    key={v.visit_id}
+                    to={`/audit-visit/${v.visit_id}`}
+                    className="flex items-center justify-between rounded-md border border-zinc-200 p-2 text-sm dark:border-zinc-800"
+                  >
+                    <span>{v.visit_date}</span>
+                    <div className="flex items-center gap-2">
+                      {v.overall_pct !== null && <span>{v.overall_pct}%</span>}
+                      {v.classification && (
+                        <Pill tone={classificationTone(v.classification)}>
+                          {v.classification === "ممتاز"
+                            ? t.excellentCountLabel
+                            : v.classification === "يحتاج تحسين"
+                              ? t.needsImprovementCountLabel
+                              : t.needsInterventionCountLabel}
+                        </Pill>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+                {t.openCorrectiveActionsTitle}
+              </h3>
+              <Link
+                to="/corrective-actions"
+                className="text-fluffy-orange text-xs font-medium"
+              >
+                {t.viewAllAction}
+              </Link>
+            </div>
+            {openActions.length === 0 ? (
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                {t.noOpenCorrectiveActions}
+              </p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {openActions.map((a) => (
+                  <div
+                    key={a.id}
+                    className="flex items-center justify-between rounded-md border border-zinc-200 p-2 text-sm dark:border-zinc-800"
+                  >
+                    <span>{a.description}</span>
+                    {a.due_date && (
+                      <span className="text-xs text-zinc-500">
+                        {a.due_date}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
 
       <section>
         <h2 className="mb-2 text-lg font-semibold">{t.recentActivityTitle}</h2>
