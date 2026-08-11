@@ -1,10 +1,28 @@
 import { useRef, useState, type DragEvent } from "react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useLocale } from "@/lib/i18n/LocaleContext";
+import { supabase } from "@/lib/supabase/client";
 import { fileToRows } from "@/lib/imports/parse";
 import { detectAdapter } from "@/lib/imports/adapters";
 import { importOrders, type ImportRunResult } from "@/lib/imports/importer";
 import type { NormalizeResult, SourceAdapter } from "@/lib/imports/types";
+
+type FoodicsSyncResult = {
+  windowFrom: string;
+  totalFetched: number;
+  resolvedCount: number;
+  unresolvedCount: number;
+  invalidCount: number;
+  insertedCount: number;
+  lineMatchedCount: number;
+  lineUnmatchedCount: number;
+};
+
+type FoodicsSyncState =
+  | { step: "idle" }
+  | { step: "syncing" }
+  | { step: "done"; result: FoodicsSyncResult }
+  | { step: "error"; message: string };
 
 type Preview = {
   adapter: SourceAdapter;
@@ -26,6 +44,9 @@ export function ImportPage() {
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [foodicsSync, setFoodicsSync] = useState<FoodicsSyncState>({
+    step: "idle",
+  });
 
   const canImport = profile?.role === "admin" || profile?.role === "accountant";
 
@@ -85,11 +106,35 @@ export function ImportPage() {
     if (file) handleFile(file);
   }
 
+  async function handleFoodicsSync() {
+    setFoodicsSync({ step: "syncing" });
+    const { data, error: invokeError } = await supabase.functions.invoke<
+      FoodicsSyncResult | { error: string }
+    >("foodics-sync");
+
+    if (invokeError || !data || "error" in data) {
+      const message =
+        (data && "error" in data && data.error) ||
+        (invokeError instanceof Error
+          ? invokeError.message
+          : t.foodicsSyncFailed);
+      setFoodicsSync({ step: "error", message });
+      return;
+    }
+    setFoodicsSync({ step: "done", result: data });
+  }
+
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
       <h1 className="text-fluffy-dark text-2xl font-semibold dark:text-zinc-50">
         {t.importTitle}
       </h1>
+
+      <FoodicsSyncPanel
+        state={foodicsSync}
+        onSync={handleFoodicsSync}
+        onReset={() => setFoodicsSync({ step: "idle" })}
+      />
 
       {stage.step === "idle" || stage.step === "unrecognized" ? (
         <div
@@ -139,6 +184,79 @@ export function ImportPage() {
           summary={stage.summary}
           onReset={() => setStage({ step: "idle" })}
         />
+      )}
+    </div>
+  );
+}
+
+function FoodicsSyncPanel({
+  state,
+  onSync,
+  onReset,
+}: {
+  state: FoodicsSyncState;
+  onSync: () => void;
+  onReset: () => void;
+}) {
+  const { t } = useLocale();
+
+  return (
+    <div className="space-y-3 rounded-md border border-zinc-200 p-4 dark:border-zinc-800">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="font-medium text-zinc-900 dark:text-zinc-100">
+            {t.foodicsSyncTitle}
+          </h2>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            {t.foodicsSyncDescription}
+          </p>
+        </div>
+        <button
+          type="button"
+          disabled={state.step === "syncing"}
+          onClick={onSync}
+          className="bg-fluffy-orange h-10 shrink-0 rounded-md px-5 text-sm font-medium text-white disabled:opacity-60"
+        >
+          {state.step === "syncing" ? t.foodicsSyncing : t.foodicsSyncButton}
+        </button>
+      </div>
+
+      {state.step === "error" && (
+        <p className="text-sm text-red-600">
+          {t.foodicsSyncFailed}: {state.message}
+        </p>
+      )}
+
+      {state.step === "done" && (
+        <div className="space-y-3">
+          <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+            <Stat
+              label={t.foodicsOrdersFetched}
+              value={state.result.totalFetched}
+            />
+            <Stat label={t.rowsResolved} value={state.result.resolvedCount} />
+            <Stat
+              label={t.rowsUnresolved}
+              value={state.result.unresolvedCount}
+            />
+            <Stat label="Inserted" value={state.result.insertedCount} />
+            <Stat
+              label={t.lineItemsMatchedLabel}
+              value={state.result.lineMatchedCount}
+            />
+            <Stat
+              label={t.lineItemsUnmatchedLabel}
+              value={state.result.lineUnmatchedCount}
+            />
+          </dl>
+          <button
+            type="button"
+            onClick={onReset}
+            className="h-9 rounded-md border border-zinc-300 px-4 text-sm font-medium dark:border-zinc-700"
+          >
+            {t.importAnother}
+          </button>
+        </div>
       )}
     </div>
   );
