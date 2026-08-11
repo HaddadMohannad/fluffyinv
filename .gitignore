@@ -36,3 +36,6 @@ yarn-error.log*
 
 # personal Claude Code settings (permission allowlists, etc.)
 .claude/settings.local.json
+
+# temporary git worktrees created for isolated background agent runs
+.claude/worktrees/
