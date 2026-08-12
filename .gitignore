@@ -36,3 +36,6 @@ yarn-error.log*
 
 # personal Claude Code settings (permission allowlists, etc.)
 .claude/settings.local.json
+
+# ephemeral git worktrees created for isolated subagent runs
+.claude/worktrees/
