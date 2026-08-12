@@ -5,6 +5,20 @@
 // API call instead of a parsed file). Manually triggered from the Import
 // page by an admin/accountant; no scheduler wired up yet (FLU-12 MVP).
 //
+// Two modes, both idempotent (safe to re-run/overlap):
+//  - Incremental (no request body, or body without `from`): picks up from
+//    the most recent already-synced order (minus a 1-day buffer), or the
+//    last DEFAULT_LOOKBACK_DAYS days on a cold start. This is what the
+//    "Sync Foodics now" button in the app calls.
+//  - Chunked backfill (POST body `{"from":"YYYY-MM-DD","to":"YYYY-MM-DD"}`):
+//    pulls a specific date window regardless of what's already synced. For
+//    backfilling historical data, invoke this repeatedly with small
+//    windows (a week or less) -- a wide window risks exceeding the Edge
+//    Function's execution time limit given ~200 orders/page with full
+//    branch+product includes. Not wired into any UI yet; invoke directly
+//    (e.g. via the Supabase dashboard's function testing UI, or a small
+//    script looping over date ranges) once FOODICS_API_TOKEN is set.
+//
 // Requires a `FOODICS_API_TOKEN` secret (Foodics personal access token,
 // generated in Foodics Back Office / developers.foodics.com). The
 // business_date_after/business_date_before/status/include/page query
@@ -21,6 +35,8 @@ const CLOSED_STATUS = 4;
 const DEFAULT_LOOKBACK_DAYS = 14;
 const CHUNK_SIZE = 500;
 const MAX_PAGES = 100; // safety cap (~20k orders) against a runaway loop
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -76,12 +92,16 @@ type FoodicsOrder = {
 
 async function fetchClosedOrders(
   businessDateAfter: string,
+  businessDateBefore: string | null,
   token: string
 ): Promise<FoodicsOrder[]> {
   const orders: FoodicsOrder[] = [];
   for (let page = 1; page <= MAX_PAGES; page++) {
     const url = new URL(`${FOODICS_API_BASE}/orders`);
     url.searchParams.set("business_date_after", businessDateAfter);
+    if (businessDateBefore) {
+      url.searchParams.set("business_date_before", businessDateBefore);
+    }
     url.searchParams.set("status", String(CLOSED_STATUS));
     url.searchParams.set("include", "branch,products.product");
     url.searchParams.set("page", String(page));
@@ -136,23 +156,52 @@ Deno.serve(async (req: Request) => {
 
     const db = createClient(supabaseUrl, serviceRoleKey);
 
-    const { data: lastOrder } = await db
-      .from("sales_orders")
-      .select("order_date")
-      .eq("source", "foodics")
-      .order("order_date", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    // Chunked backfill mode: an explicit {from, to} body bypasses the
+    // "since last sync" logic entirely, so callers can walk historical
+    // date ranges in safe, resumable windows.
+    let requestBody: { from?: string; to?: string } = {};
+    try {
+      const text = await req.text();
+      if (text) requestBody = JSON.parse(text);
+    } catch {
+      return json({ error: "Invalid JSON body" }, 400);
+    }
 
-    const businessDateAfter = lastOrder?.order_date
-      ? new Date(new Date(lastOrder.order_date).getTime() - 24 * 3600 * 1000)
-          .toISOString()
-          .slice(0, 10)
-      : new Date(Date.now() - DEFAULT_LOOKBACK_DAYS * 24 * 3600 * 1000)
-          .toISOString()
-          .slice(0, 10);
+    let businessDateAfter: string;
+    let businessDateBefore: string | null = null;
 
-    const rawOrders = await fetchClosedOrders(businessDateAfter, foodicsToken);
+    if (requestBody.from) {
+      if (
+        !DATE_RE.test(requestBody.from) ||
+        (requestBody.to && !DATE_RE.test(requestBody.to))
+      ) {
+        return json({ error: "from/to must be YYYY-MM-DD" }, 400);
+      }
+      businessDateAfter = requestBody.from;
+      businessDateBefore = requestBody.to ?? null;
+    } else {
+      const { data: lastOrder } = await db
+        .from("sales_orders")
+        .select("order_date")
+        .eq("source", "foodics")
+        .order("order_date", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      businessDateAfter = lastOrder?.order_date
+        ? new Date(new Date(lastOrder.order_date).getTime() - 24 * 3600 * 1000)
+            .toISOString()
+            .slice(0, 10)
+        : new Date(Date.now() - DEFAULT_LOOKBACK_DAYS * 24 * 3600 * 1000)
+            .toISOString()
+            .slice(0, 10);
+    }
+
+    const rawOrders = await fetchClosedOrders(
+      businessDateAfter,
+      businessDateBefore,
+      foodicsToken
+    );
 
     const { data: aliases } = await db
       .from("location_aliases")
@@ -332,6 +381,7 @@ Deno.serve(async (req: Request) => {
 
     return json({
       windowFrom: businessDateAfter,
+      windowTo: businessDateBefore,
       totalFetched: rawOrders.length,
       resolvedCount: resolved.length,
       unresolvedCount: unresolvedBranch.length,
