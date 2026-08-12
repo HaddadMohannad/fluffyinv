@@ -14,6 +14,72 @@ export type Database = {
   };
   public: {
     Tables: {
+      addon_categories: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          foodics_id: string | null;
+          id: string;
+          is_ready: boolean;
+          name_ar: string;
+          name_en: string;
+          sort_order: number;
+        };
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          foodics_id?: string | null;
+          id?: string;
+          is_ready?: boolean;
+          name_ar: string;
+          name_en: string;
+          sort_order?: number;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          foodics_id?: string | null;
+          id?: string;
+          is_ready?: boolean;
+          name_ar?: string;
+          name_en?: string;
+          sort_order?: number;
+        };
+        Relationships: [];
+      };
+      addon_category_options: {
+        Row: {
+          addon_category_id: string;
+          product_id: string;
+          sort_order: number;
+        };
+        Insert: {
+          addon_category_id: string;
+          product_id: string;
+          sort_order?: number;
+        };
+        Update: {
+          addon_category_id?: string;
+          product_id?: string;
+          sort_order?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "addon_category_options_addon_category_id_fkey";
+            columns: ["addon_category_id"];
+            isOneToOne: false;
+            referencedRelation: "addon_categories";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "addon_category_options_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       alert_settings: {
         Row: {
           id: boolean;
@@ -911,6 +977,39 @@ export type Database = {
           },
         ];
       };
+      product_addon_categories: {
+        Row: {
+          addon_category_id: string;
+          product_id: string;
+          sort_order: number;
+        };
+        Insert: {
+          addon_category_id: string;
+          product_id: string;
+          sort_order?: number;
+        };
+        Update: {
+          addon_category_id?: string;
+          product_id?: string;
+          sort_order?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "product_addon_categories_addon_category_id_fkey";
+            columns: ["addon_category_id"];
+            isOneToOne: false;
+            referencedRelation: "addon_categories";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "product_addon_categories_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       product_aliases: {
         Row: {
           created_at: string;
@@ -933,6 +1032,36 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "product_aliases_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      product_locations: {
+        Row: {
+          location_id: string;
+          product_id: string;
+        };
+        Insert: {
+          location_id: string;
+          product_id: string;
+        };
+        Update: {
+          location_id?: string;
+          product_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "product_locations_location_id_fkey";
+            columns: ["location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "product_locations_product_id_fkey";
             columns: ["product_id"];
             isOneToOne: false;
             referencedRelation: "products";
@@ -1015,12 +1144,17 @@ export type Database = {
           brand: string | null;
           category: string | null;
           created_at: string;
+          foodics_id: string | null;
           id: string;
+          is_addon: boolean;
           is_combo: boolean;
           name_ar: string;
           name_en: string;
+          recipe_unit: string | null;
           reorder_threshold: number | null;
           selling_price: number | null;
+          sku: string | null;
+          storage_to_recipe_factor: number;
           type: Database["public"]["Enums"]["product_type"];
           unit: Database["public"]["Enums"]["product_unit"];
         };
@@ -1030,12 +1164,17 @@ export type Database = {
           brand?: string | null;
           category?: string | null;
           created_at?: string;
+          foodics_id?: string | null;
           id?: string;
+          is_addon?: boolean;
           is_combo?: boolean;
           name_ar: string;
           name_en: string;
+          recipe_unit?: string | null;
           reorder_threshold?: number | null;
           selling_price?: number | null;
+          sku?: string | null;
+          storage_to_recipe_factor?: number;
           type: Database["public"]["Enums"]["product_type"];
           unit: Database["public"]["Enums"]["product_unit"];
         };
@@ -1045,12 +1184,17 @@ export type Database = {
           brand?: string | null;
           category?: string | null;
           created_at?: string;
+          foodics_id?: string | null;
           id?: string;
+          is_addon?: boolean;
           is_combo?: boolean;
           name_ar?: string;
           name_en?: string;
+          recipe_unit?: string | null;
           reorder_threshold?: number | null;
           selling_price?: number | null;
+          sku?: string | null;
+          storage_to_recipe_factor?: number;
           type?: Database["public"]["Enums"]["product_type"];
           unit?: Database["public"]["Enums"]["product_unit"];
         };

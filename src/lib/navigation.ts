@@ -28,6 +28,9 @@ import {
   Users,
   PackageSearch,
   GitCompare,
+  UtensilsCrossed,
+  PlusCircle,
+  Tags,
 } from "lucide-react";
 import { dictionary } from "@/lib/i18n/dictionary";
 
@@ -200,6 +203,24 @@ export const NAV_ITEMS: NavItem[] = [
     icon: GitCompare,
     roles: ["admin", "accountant"],
   },
+  {
+    href: "/menu",
+    labelKey: "menu",
+    icon: UtensilsCrossed,
+    roles: ["admin"],
+  },
+  {
+    href: "/add-ons",
+    labelKey: "addons",
+    icon: PlusCircle,
+    roles: ["admin"],
+  },
+  {
+    href: "/addon-categories",
+    labelKey: "addonCategories",
+    icon: Tags,
+    roles: ["admin"],
+  },
 ];
 
 // Every module a role sees out of the box, before any per-user
@@ -250,6 +271,9 @@ export const NAV_GROUPS: NavGroup[] = [
       "/waste",
       "/hospitality",
       "/consumption",
+      "/menu",
+      "/add-ons",
+      "/addon-categories",
     ],
   },
   {
