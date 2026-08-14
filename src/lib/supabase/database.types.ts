@@ -1039,6 +1039,90 @@ export type Database = {
           },
         ];
       };
+      product_categories: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          id: string;
+          name_ar: string;
+          name_en: string;
+          sort_order: number;
+        };
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          name_ar: string;
+          name_en: string;
+          sort_order?: number;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          name_ar?: string;
+          name_en?: string;
+          sort_order?: number;
+        };
+        Relationships: [];
+      };
+      product_group_members: {
+        Row: {
+          group_id: string;
+          product_id: string;
+        };
+        Insert: {
+          group_id: string;
+          product_id: string;
+        };
+        Update: {
+          group_id?: string;
+          product_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "product_group_members_group_id_fkey";
+            columns: ["group_id"];
+            isOneToOne: false;
+            referencedRelation: "product_groups";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "product_group_members_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      product_groups: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          id: string;
+          name_ar: string;
+          name_en: string;
+          sort_order: number;
+        };
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          name_ar: string;
+          name_en: string;
+          sort_order?: number;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          id?: string;
+          name_ar?: string;
+          name_en?: string;
+          sort_order?: number;
+        };
+        Relationships: [];
+      };
       product_locations: {
         Row: {
           location_id: string;
@@ -1142,7 +1226,7 @@ export type Database = {
           active: boolean;
           avg_cost: number;
           brand: string | null;
-          category: string | null;
+          category_id: string | null;
           created_at: string;
           foodics_id: string | null;
           id: string;
@@ -1162,7 +1246,7 @@ export type Database = {
           active?: boolean;
           avg_cost?: number;
           brand?: string | null;
-          category?: string | null;
+          category_id?: string | null;
           created_at?: string;
           foodics_id?: string | null;
           id?: string;
@@ -1182,7 +1266,7 @@ export type Database = {
           active?: boolean;
           avg_cost?: number;
           brand?: string | null;
-          category?: string | null;
+          category_id?: string | null;
           created_at?: string;
           foodics_id?: string | null;
           id?: string;
@@ -1198,7 +1282,15 @@ export type Database = {
           type?: Database["public"]["Enums"]["product_type"];
           unit?: Database["public"]["Enums"]["product_unit"];
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "product_categories";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       profile_module_grants: {
         Row: {

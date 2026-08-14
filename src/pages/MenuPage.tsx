@@ -11,7 +11,7 @@ const emptyForm = {
   name_en: "",
   name_ar: "",
   sku: "",
-  category: "",
+  category_id: "",
   selling_price: "",
   unit: "pcs" as Enums<"product_unit">,
   active: true,
@@ -30,6 +30,11 @@ export function MenuPage() {
   const [offeredCategories, setOfferedCategories] = useState<Set<string>>(
     new Set()
   );
+  const [categories, setCategories] = useState<Tables<"product_categories">[]>(
+    []
+  );
+  const [groups, setGroups] = useState<Tables<"product_groups">[]>([]);
+  const [memberGroups, setMemberGroups] = useState<Set<string>>(new Set());
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -51,12 +56,25 @@ export function MenuPage() {
       .eq("active", true)
       .order("sort_order")
       .then(({ data }) => setAddonCategories(data ?? []));
+    supabase
+      .from("product_categories")
+      .select("*")
+      .eq("active", true)
+      .order("sort_order")
+      .then(({ data }) => setCategories(data ?? []));
+    supabase
+      .from("product_groups")
+      .select("*")
+      .eq("active", true)
+      .order("sort_order")
+      .then(({ data }) => setGroups(data ?? []));
   }, [canManage, refreshKey]);
 
   useEffect(() => {
     if (!form.id) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- clearing derived state when there's no product selected yet
       setOfferedCategories(new Set());
+      setMemberGroups(new Set());
       return;
     }
     supabase
@@ -67,6 +85,13 @@ export function MenuPage() {
         setOfferedCategories(
           new Set((data ?? []).map((r) => r.addon_category_id))
         );
+      });
+    supabase
+      .from("product_group_members")
+      .select("group_id")
+      .eq("product_id", form.id)
+      .then(({ data }) => {
+        setMemberGroups(new Set((data ?? []).map((r) => r.group_id)));
       });
   }, [form.id, refreshKey]);
 
@@ -88,7 +113,7 @@ export function MenuPage() {
       name_en: product.name_en,
       name_ar: product.name_ar,
       sku: product.sku ?? "",
-      category: product.category ?? "",
+      category_id: product.category_id ?? "",
       selling_price:
         product.selling_price !== null ? String(product.selling_price) : "",
       unit: product.unit,
@@ -110,7 +135,7 @@ export function MenuPage() {
       name_en: form.name_en.trim(),
       name_ar: form.name_ar.trim(),
       sku: form.sku.trim() || null,
-      category: form.category.trim() || null,
+      category_id: form.category_id || null,
       selling_price: form.selling_price ? Number(form.selling_price) : null,
       unit: form.unit,
       active: form.active,
@@ -155,6 +180,32 @@ export function MenuPage() {
     setRefreshKey((k) => k + 1);
   }
 
+  async function toggleGroup(groupId: string, member: boolean) {
+    if (!form.id) return;
+    setError(null);
+    const { error: toggleError } = member
+      ? await supabase
+          .from("product_group_members")
+          .delete()
+          .eq("product_id", form.id)
+          .eq("group_id", groupId)
+      : await supabase
+          .from("product_group_members")
+          .insert({ product_id: form.id, group_id: groupId });
+    if (toggleError) {
+      console.error("Toggle menu item group failed:", toggleError);
+      setError(toggleError.message);
+      return;
+    }
+    setRefreshKey((k) => k + 1);
+  }
+
+  function categoryName(categoryId: string | null) {
+    const c = categories.find((cat) => cat.id === categoryId);
+    if (!c) return "—";
+    return locale === "ar" ? c.name_ar : c.name_en;
+  }
+
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
       <h1 className="text-fluffy-dark text-2xl font-semibold dark:text-zinc-50">
@@ -193,7 +244,7 @@ export function MenuPage() {
                 <td className="p-2">
                   {locale === "ar" ? item.name_ar : item.name_en}
                 </td>
-                <td className="p-2">{item.category ?? "—"}</td>
+                <td className="p-2">{categoryName(item.category_id)}</td>
                 <td className="p-2 text-end">{item.selling_price ?? "—"}</td>
                 <td className="p-2 text-center">{item.active ? "✓" : ""}</td>
                 <td className="p-2 text-end">
@@ -239,13 +290,18 @@ export function MenuPage() {
 
         <label className="flex flex-col gap-1 text-sm">
           {t.categoryColumn}
-          <input
-            type="text"
-            dir="auto"
-            value={form.category}
-            onChange={(e) => setForm({ ...form, category: e.target.value })}
+          <select
+            value={form.category_id}
+            onChange={(e) => setForm({ ...form, category_id: e.target.value })}
             className="h-11 rounded-md border border-zinc-300 px-3 dark:border-zinc-700 dark:bg-zinc-900"
-          />
+          >
+            <option value="">{t.noneValue}</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {locale === "ar" ? c.name_ar : c.name_en}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label className="flex flex-col gap-1 text-sm">
@@ -322,6 +378,31 @@ export function MenuPage() {
                 </label>
               ))}
             </div>
+          </section>
+
+          <section className="flex max-w-2xl flex-col gap-2">
+            <h2 className="text-base font-semibold">{t.productGroupsTitle}</h2>
+            {groups.length === 0 ? (
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                {t.noProductGroupsYet}
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-3">
+                {groups.map((g) => (
+                  <label
+                    key={g.id}
+                    className="flex items-center gap-1.5 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={memberGroups.has(g.id)}
+                      onChange={() => toggleGroup(g.id, memberGroups.has(g.id))}
+                    />
+                    {locale === "ar" ? g.name_ar : g.name_en}
+                  </label>
+                ))}
+              </div>
+            )}
           </section>
 
           <section className="flex max-w-2xl flex-col gap-2">

@@ -36,6 +36,8 @@ import { BranchComparisonPage } from "@/pages/BranchComparisonPage";
 import { MenuPage } from "@/pages/MenuPage";
 import { AddOnsPage } from "@/pages/AddOnsPage";
 import { AddOnCategoriesPage } from "@/pages/AddOnCategoriesPage";
+import { ProductCategoriesPage } from "@/pages/ProductCategoriesPage";
+import { ProductGroupsPage } from "@/pages/ProductGroupsPage";
 
 // Charting (recharts) adds significant weight — only load it for people
 // who actually open the quality dashboard.
@@ -317,6 +319,22 @@ export function App() {
           element={
             <AppShell title={t.addonCategoriesTitle}>
               <AddOnCategoriesPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/product-categories"
+          element={
+            <AppShell title={t.productCategoriesTitle}>
+              <ProductCategoriesPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/product-groups"
+          element={
+            <AppShell title={t.productGroupsTitle}>
+              <ProductGroupsPage />
             </AppShell>
           }
         />
