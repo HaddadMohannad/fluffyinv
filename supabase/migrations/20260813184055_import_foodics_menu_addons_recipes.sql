@@ -9,18 +9,16 @@
 -- products total), 321 recipe_lines, 292 product_locations, 119
 -- addon_category_options, 111 product_addon_categories.
 --
--- KNOWN LIMITATION: matching was name-text-based only (exact match
--- against products.name_en/name_ar or product_aliases.raw_name), so a
--- handful of raw ingredients whose existing product name doesn't share
--- text with Foodics' label were NOT matched and got a duplicate "shadow"
--- row instead (e.g. existing "Marinated Chicken Breast" vs a newly
--- created "صدور دجاج جاهزة" for the same real ingredient, both now on
--- Fluffy Burger Sandwich's recipe; likely also "Cheddar Slices" vs
--- "جبنة شيدر اصفر شرائح", and possibly "Lettuce" vs "خس ايسبرغ"/"خس
--- برجر"). Harmless today (no sale-triggered deduction is wired up yet),
--- but should be reconciled by an admin via the Menu/Add-ons pages
--- before that gets built, or duplicate raw ingredients will each need
--- separate stock tracking.
+-- KNOWN LIMITATION (resolved by 20260814055538/20260814055601): matching
+-- was name-text-based only, so a couple of raw ingredients whose existing
+-- product name doesn't share text with Foodics' label were not matched
+-- and got a duplicate "shadow" row instead -- "Marinated Chicken Breast"
+-- vs "صدور دجاج جاهزة" and "Cheddar Slices" vs "جبنة شيدر اصفر شرائح",
+-- both merged in 20260814055538. "خس ايسبرغ"/"خس برجر" were investigated
+-- too and turned out NOT to be duplicates of "Lettuce" -- they're used on
+-- entirely non-overlapping menu items, so Foodics genuinely tracks them
+-- as distinct ingredients; left as-is. A throwaway "kitchen note" row
+-- that came through as a fake menu item was removed in 20260814055601.
 --
 -- Source data snapshot: Foodics search_products (91 total / 73 active,
 -- non-deleted), search_modifiers (33 groups / 24 active, 119 active
