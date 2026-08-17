@@ -7,9 +7,12 @@
 //
 // Two modes, both idempotent (safe to re-run/overlap):
 //  - Incremental (no request body, or body without `from`): picks up from
-//    the most recent already-synced order (minus a 1-day buffer), or the
-//    last DEFAULT_LOOKBACK_DAYS days on a cold start. This is what the
-//    "Sync Foodics now" button in the app calls.
+//    the most recent already-synced order (minus a 1-day buffer), capped to
+//    at most MAX_INCREMENTAL_LOOKBACK_DAYS back even if that order is much
+//    older (protects against a stale/partial low-water-mark silently
+//    ballooning into a near-full-history pull and tripping Foodics' rate
+//    limiter), or the last DEFAULT_LOOKBACK_DAYS days on a cold start. This
+//    is what the "Sync Foodics now" button in the app calls.
 //  - Chunked backfill (POST body `{"from":"YYYY-MM-DD","to":"YYYY-MM-DD"}`):
 //    pulls a specific date window regardless of what's already synced. For
 //    backfilling historical data, invoke this repeatedly with small
@@ -33,8 +36,18 @@ const FOODICS_API_BASE =
   Deno.env.get("FOODICS_API_BASE") ?? "https://api.foodics.com/v5";
 const CLOSED_STATUS = 4;
 const DEFAULT_LOOKBACK_DAYS = 14;
+// Caps how far back an incremental ("since last sync") run will reach, even
+// if the last synced order in the DB is much older -- e.g. a partial/stalled
+// prior run leaving a stale low-water-mark. Without this cap, one click of
+// "Sync Foodics now" could silently turn into a near-full-history pull and
+// trip Foodics' rate limiter (seen in practice: 429 "Too Many Attempts").
+// A real historical backfill should go through the explicit {from, to}
+// chunked-backfill mode instead, not this incremental path.
+const MAX_INCREMENTAL_LOOKBACK_DAYS = 30;
 const CHUNK_SIZE = 500;
 const MAX_PAGES = 100; // safety cap (~20k orders) against a runaway loop
+const PAGE_DELAY_MS = 300; // spacing between page requests to stay under rate limits
+const MAX_RETRIES_PER_PAGE = 4;
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -90,6 +103,40 @@ type FoodicsOrder = {
   products?: FoodicsProductLine[];
 };
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchOrdersPage(
+  url: URL,
+  token: string
+): Promise<FoodicsOrder[]> {
+  for (let attempt = 0; attempt <= MAX_RETRIES_PER_PAGE; attempt++) {
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    });
+    if (res.status === 429) {
+      if (attempt === MAX_RETRIES_PER_PAGE) {
+        throw new Error(`Foodics API error 429: ${await res.text()}`);
+      }
+      const retryAfterHeader = res.headers.get("Retry-After");
+      const retryAfterMs = retryAfterHeader
+        ? Number(retryAfterHeader) * 1000
+        : 1000 * 2 ** attempt; // exponential backoff: 1s, 2s, 4s, 8s
+      await sleep(
+        Number.isFinite(retryAfterMs) ? retryAfterMs : 1000 * 2 ** attempt
+      );
+      continue;
+    }
+    if (!res.ok) {
+      throw new Error(`Foodics API error ${res.status}: ${await res.text()}`);
+    }
+    const body = await res.json();
+    return body.data ?? [];
+  }
+  return [];
+}
+
 async function fetchClosedOrders(
   businessDateAfter: string,
   businessDateBefore: string | null,
@@ -106,14 +153,8 @@ async function fetchClosedOrders(
     url.searchParams.set("include", "branch,products.product");
     url.searchParams.set("page", String(page));
 
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
-    });
-    if (!res.ok) {
-      throw new Error(`Foodics API error ${res.status}: ${await res.text()}`);
-    }
-    const body = await res.json();
-    const pageData: FoodicsOrder[] = body.data ?? [];
+    if (page > 1) await sleep(PAGE_DELAY_MS);
+    const pageData = await fetchOrdersPage(url, token);
     orders.push(...pageData);
     if (pageData.length === 0) break;
   }
@@ -188,13 +229,17 @@ Deno.serve(async (req: Request) => {
         .limit(1)
         .maybeSingle();
 
-      businessDateAfter = lastOrder?.order_date
-        ? new Date(new Date(lastOrder.order_date).getTime() - 24 * 3600 * 1000)
-            .toISOString()
-            .slice(0, 10)
-        : new Date(Date.now() - DEFAULT_LOOKBACK_DAYS * 24 * 3600 * 1000)
-            .toISOString()
-            .slice(0, 10);
+      const oldestAllowed =
+        Date.now() - MAX_INCREMENTAL_LOOKBACK_DAYS * 24 * 3600 * 1000;
+      const fromLastOrder = lastOrder?.order_date
+        ? new Date(lastOrder.order_date).getTime() - 24 * 3600 * 1000
+        : null;
+      const cutoffMs =
+        fromLastOrder !== null
+          ? Math.max(fromLastOrder, oldestAllowed)
+          : Date.now() - DEFAULT_LOOKBACK_DAYS * 24 * 3600 * 1000;
+
+      businessDateAfter = new Date(cutoffMs).toISOString().slice(0, 10);
     }
 
     const rawOrders = await fetchClosedOrders(
