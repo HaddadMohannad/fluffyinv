@@ -45,6 +45,10 @@ const DEFAULT_LOOKBACK_DAYS = 14;
 // chunked-backfill mode instead, not this incremental path.
 const MAX_INCREMENTAL_LOOKBACK_DAYS = 30;
 const CHUNK_SIZE = 500;
+// Smaller than CHUNK_SIZE: a `.in("external_ref", [...])` filter puts every
+// id in the URL query string, so a full CHUNK_SIZE batch of UUIDs there
+// blows past the request layer's URL length limit.
+const LOOKUP_CHUNK_SIZE = 100;
 const MAX_PAGES = 100; // safety cap (~20k orders) against a runaway loop
 const PAGE_DELAY_MS = 300; // spacing between page requests to stay under rate limits
 const MAX_RETRIES_PER_PAGE = 4;
@@ -380,18 +384,24 @@ Deno.serve(async (req: Request) => {
       if (upsertError) throw upsertError;
       insertedCount += upserted?.length ?? 0;
 
-      const { data: orderIdRows, error: lookupError } = await db
-        .from("sales_orders")
-        .select("id, external_ref")
-        .eq("source", "foodics")
-        .in(
-          "external_ref",
-          batch.map((o) => o.externalRef)
-        );
-      if (lookupError) throw lookupError;
-      const orderIdByRef = new Map(
-        (orderIdRows ?? []).map((r) => [r.external_ref, r.id])
-      );
+      // `.in()` puts every external_ref in the URL query string -- a full
+      // CHUNK_SIZE batch of UUIDs blows past the request layer's URL length
+      // limit ("TypeError: error sending request" in practice). Look them
+      // up in smaller sub-batches instead.
+      const orderIdByRef = new Map<string, string>();
+      for (const lookupBatch of chunk(
+        batch.map((o) => o.externalRef),
+        LOOKUP_CHUNK_SIZE
+      )) {
+        const { data: orderIdRows, error: lookupError } = await db
+          .from("sales_orders")
+          .select("id, external_ref")
+          .eq("source", "foodics")
+          .in("external_ref", lookupBatch);
+        if (lookupError) throw lookupError;
+        for (const r of orderIdRows ?? [])
+          orderIdByRef.set(r.external_ref, r.id);
+      }
 
       for (const o of batch) {
         const orderId = orderIdByRef.get(o.externalRef);
