@@ -403,34 +403,50 @@ Deno.serve(async (req: Request) => {
           orderIdByRef.set(r.external_ref, r.id);
       }
 
-      for (const o of batch) {
-        const orderId = orderIdByRef.get(o.externalRef);
-        if (!orderId) continue;
-
+      // Batch the sales_lines replace across the whole order batch instead
+      // of one delete + one insert per order -- at real data volumes (a
+      // 30-day window can be thousands of orders) that many serial round
+      // trips is what was actually timing out the function (HTTP 546),
+      // not the Foodics fetch itself.
+      const orderIdsInBatch = [...orderIdByRef.values()];
+      for (const deleteBatch of chunk(orderIdsInBatch, LOOKUP_CHUNK_SIZE)) {
+        if (deleteBatch.length === 0) continue;
         const { error: deleteError } = await db
           .from("sales_lines")
           .delete()
-          .eq("order_id", orderId);
+          .in("order_id", deleteBatch);
         if (deleteError) throw deleteError;
+      }
 
-        const lineRows = o.lines.map((line) => {
+      const lineRowsAll: {
+        order_id: string;
+        product_id: string | null;
+        qty: number;
+        raw_item_name: string;
+        unit_price: number;
+      }[] = [];
+      for (const o of batch) {
+        const orderId = orderIdByRef.get(o.externalRef);
+        if (!orderId) continue;
+        for (const line of o.lines) {
           const productId = resolveProductId(line.itemName);
           if (productId) lineMatchedCount += 1;
           else lineUnmatchedCount += 1;
-          return {
+          lineRowsAll.push({
             order_id: orderId,
             product_id: productId,
             qty: line.qty,
             raw_item_name: line.itemName,
             unit_price: line.unitPrice,
-          };
-        });
-        if (lineRows.length > 0) {
-          const { error: insertLinesError } = await db
-            .from("sales_lines")
-            .insert(lineRows);
-          if (insertLinesError) throw insertLinesError;
+          });
         }
+      }
+      for (const insertBatch of chunk(lineRowsAll, CHUNK_SIZE)) {
+        if (insertBatch.length === 0) continue;
+        const { error: insertLinesError } = await db
+          .from("sales_lines")
+          .insert(insertBatch);
+        if (insertLinesError) throw insertLinesError;
       }
     }
 
