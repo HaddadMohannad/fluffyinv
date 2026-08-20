@@ -542,13 +542,15 @@ export const dictionary = {
     availableSelectedBranches:
       "Restricted to the checked branches only. Uncheck a branch to remove it, or check every branch to lift the restriction.",
     recipeTitle: "Recipe",
-    noRecipeLines: "No recipe lines yet — nothing will be deducted from inventory for this item.",
+    noRecipeLines:
+      "No recipe lines yet — nothing will be deducted from inventory for this item.",
     recipeComponentLabel: "Ingredient",
     recipeQtyLabel: "Quantity",
     recipeUnitLabel: "Unit",
     recipeUnitPlaceholder: "e.g. gram, slice, piece",
     recipeFactorLabel: "Units per storage unit",
-    recipeUnitRequired: "Set a unit and conversion factor for this ingredient first.",
+    recipeUnitRequired:
+      "Set a unit and conversion factor for this ingredient first.",
     addRecipeLine: "Add ingredient",
     skuLabel: "SKU",
     sellingPriceLabel: "Selling price (JOD)",
@@ -561,6 +563,18 @@ export const dictionary = {
     newProductGroupTitle: "New Group",
     noProductGroupsYet: "No groups yet — add one below.",
     menuBuilderGroupLabel: "Menu Builder",
+    menuItemDetailHint:
+      "Select a menu item above to see its recipe, add-ons, groups, and availability.",
+    tabAddons: "Add-ons",
+    tabGroups: "Groups",
+    tabAvailability: "Availability",
+    addonOptionsInCategoryTitle: "Options in this category",
+    noAddonOptionsYet: "No options yet.",
+    addNewAddonOption: "New option",
+    newAddonOptionNote:
+      "Adding an option here makes it available on every menu item offering this category, not just this one.",
+    offerThisCategoryFirst:
+      "Turn on this category above to manage its options.",
   },
   ar: {
     appName: "فلافي - المخزون",
@@ -1121,6 +1135,17 @@ export const dictionary = {
     newProductGroupTitle: "مجموعة جديدة",
     noProductGroupsYet: "لا توجد مجموعات بعد — أضف واحدة أدناه.",
     menuBuilderGroupLabel: "بناء القائمة",
+    menuItemDetailHint:
+      "اختر صنفاً من القائمة أعلاه لعرض وصفته وإضافاته ومجموعاته وتوفره.",
+    tabAddons: "الإضافات",
+    tabGroups: "المجموعات",
+    tabAvailability: "التوفر",
+    addonOptionsInCategoryTitle: "الخيارات في هذه الفئة",
+    noAddonOptionsYet: "لا توجد خيارات بعد.",
+    addNewAddonOption: "خيار جديد",
+    newAddonOptionNote:
+      "إضافة خيار هنا يجعله متاحاً لكل صنف في القائمة يقدّم هذه الفئة، وليس لهذا الصنف فقط.",
+    offerThisCategoryFirst: "فعّل هذه الفئة أعلاه لإدارة خياراتها.",
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 
