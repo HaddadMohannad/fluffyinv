@@ -2271,6 +2271,21 @@ export type Database = {
         };
         Returns: undefined;
       };
+      sales_dashboard_summary: {
+        Args: {
+          p_date_from?: string;
+          p_date_to?: string;
+          p_location_id?: string;
+          p_source?: Database["public"]["Enums"]["sales_source"];
+        };
+        Returns: {
+          commission: number;
+          day: string;
+          gross: number;
+          net: number;
+          orders: number;
+        }[];
+      };
       save_alert_settings: {
         Args: {
           p_stocktake_threshold_jod: number;
