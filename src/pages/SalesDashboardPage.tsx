@@ -4,16 +4,13 @@ import { useLocale } from "@/lib/i18n/LocaleContext";
 import { downloadCsv } from "@/lib/exportCsv";
 import type { Enums, Tables } from "@/lib/supabase/database.types";
 
-type SalesRow = Pick<
-  Tables<"sales_orders">,
-  | "id"
-  | "source"
-  | "location_id"
-  | "order_date"
-  | "gross"
-  | "commission"
-  | "net"
->;
+type DaySummary = {
+  day: string;
+  orders: number;
+  gross: number;
+  commission: number;
+  net: number;
+};
 
 type SalesSource = Enums<"sales_source">;
 
@@ -28,9 +25,10 @@ const SOURCES: SalesSource[] = [
 export function SalesDashboardPage() {
   const { t } = useLocale();
   const [locations, setLocations] = useState<Tables<"locations">[]>([]);
-  const [rows, setRows] = useState<SalesRow[]>([]);
+  const [byDay, setByDay] = useState<DaySummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -51,24 +49,26 @@ export function SalesDashboardPage() {
     setLoading(true);
     setError(null);
 
-    let query = supabase
-      .from("sales_orders")
-      .select("id, source, location_id, order_date, gross, commission, net");
-
-    if (dateFrom) query = query.gte("order_date", dateFrom);
-    if (dateTo) query = query.lte("order_date", `${dateTo}T23:59:59`);
-    if (locationId) query = query.eq("location_id", locationId);
-    if (source) query = query.eq("source", source);
-
-    query.then(({ data, error: queryError }) => {
-      if (!active) return;
-      if (queryError) {
-        setError(queryError.message);
-      } else {
-        setRows(data ?? []);
-      }
-      setLoading(false);
-    });
+    // Aggregated server-side (one row per day, not per order) -- a raw
+    // per-order select() here gets silently capped at 1000 rows by
+    // PostgREST once a filter matches more than that, which understated
+    // totals as soon as real order volume passed four figures.
+    supabase
+      .rpc("sales_dashboard_summary", {
+        p_date_from: dateFrom || undefined,
+        p_date_to: dateTo || undefined,
+        p_location_id: locationId || undefined,
+        p_source: source || undefined,
+      })
+      .then(({ data, error: queryError }) => {
+        if (!active) return;
+        if (queryError) {
+          setError(queryError.message);
+        } else {
+          setByDay(data ?? []);
+        }
+        setLoading(false);
+      });
 
     return () => {
       active = false;
@@ -82,53 +82,65 @@ export function SalesDashboardPage() {
 
   const totals = useMemo(
     () =>
-      rows.reduce(
-        (acc, r) => ({
-          gross: acc.gross + r.gross,
-          commission: acc.commission + r.commission,
-          net: acc.net + r.net,
-          orders: acc.orders + 1,
+      byDay.reduce(
+        (acc, d) => ({
+          gross: acc.gross + d.gross,
+          commission: acc.commission + d.commission,
+          net: acc.net + d.net,
+          orders: acc.orders + d.orders,
         }),
         { gross: 0, commission: 0, net: 0, orders: 0 }
       ),
-    [rows]
+    [byDay]
   );
 
-  const byDay = useMemo(() => {
-    const map = new Map<
-      string,
-      { orders: number; gross: number; commission: number; net: number }
-    >();
-    for (const r of rows) {
-      const day = r.order_date.slice(0, 10);
-      const existing = map.get(day) ?? {
-        orders: 0,
-        gross: 0,
-        commission: 0,
-        net: 0,
-      };
-      existing.orders += 1;
-      existing.gross += r.gross;
-      existing.commission += r.commission;
-      existing.net += r.net;
-      map.set(day, existing);
-    }
-    return Array.from(map.entries()).sort(([a], [b]) => b.localeCompare(a));
-  }, [rows]);
+  async function handleExport() {
+    setExporting(true);
+    try {
+      // The per-order CSV needs raw rows, unlike the aggregated totals
+      // above -- page through with .range() so an export matching more
+      // than 1000 orders isn't silently truncated either.
+      const pageSize = 1000;
+      const allRows: Pick<
+        Tables<"sales_orders">,
+        "order_date" | "source" | "location_id" | "gross" | "commission" | "net"
+      >[] = [];
+      for (let page = 0; ; page++) {
+        let query = supabase
+          .from("sales_orders")
+          .select("order_date, source, location_id, gross, commission, net")
+          .order("id", { ascending: true })
+          .range(page * pageSize, page * pageSize + pageSize - 1);
 
-  function handleExport() {
-    downloadCsv(
-      "sales-export.csv",
-      ["Date", "Source", "Branch", "Gross", "Commission", "Net"],
-      rows.map((r) => [
-        r.order_date.slice(0, 10),
-        r.source,
-        locationName(r.location_id),
-        r.gross,
-        r.commission,
-        r.net,
-      ])
-    );
+        if (dateFrom) query = query.gte("order_date", dateFrom);
+        if (dateTo) query = query.lte("order_date", dateTo);
+        if (locationId) query = query.eq("location_id", locationId);
+        if (source) query = query.eq("source", source);
+
+        const { data, error: queryError } = await query;
+        if (queryError) {
+          setError(queryError.message);
+          return;
+        }
+        allRows.push(...(data ?? []));
+        if (!data || data.length < pageSize) break;
+      }
+
+      downloadCsv(
+        "sales-export.csv",
+        ["Date", "Source", "Branch", "Gross", "Commission", "Net"],
+        allRows.map((r) => [
+          r.order_date,
+          r.source,
+          locationName(r.location_id),
+          r.gross,
+          r.commission,
+          r.net,
+        ])
+      );
+    } finally {
+      setExporting(false);
+    }
   }
 
   return (
@@ -140,10 +152,10 @@ export function SalesDashboardPage() {
         <button
           type="button"
           onClick={handleExport}
-          disabled={rows.length === 0}
+          disabled={totals.orders === 0 || exporting}
           className="h-11 rounded-md border border-zinc-300 px-4 text-sm font-medium disabled:opacity-60 dark:border-zinc-700"
         >
-          {t.exportCsv}
+          {exporting ? t.loadingSales : t.exportCsv}
         </button>
       </div>
 
@@ -224,12 +236,12 @@ export function SalesDashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {byDay.map(([day, d]) => (
+              {byDay.map((d) => (
                 <tr
-                  key={day}
+                  key={d.day}
                   className="border-t border-zinc-100 dark:border-zinc-800"
                 >
-                  <td className="p-2">{day}</td>
+                  <td className="p-2">{d.day}</td>
                   <td className="p-2 text-end">{d.orders}</td>
                   <td className="p-2 text-end">{d.gross.toFixed(2)}</td>
                   <td className="p-2 text-end">{d.commission.toFixed(2)}</td>
