@@ -5,6 +5,9 @@ import { supabase } from "@/lib/supabase/client";
 import type { Enums, Tables } from "@/lib/supabase/database.types";
 import { LocationAvailabilityPicker } from "@/components/LocationAvailabilityPicker";
 import { RecipeLinesEditor } from "@/components/RecipeLinesEditor";
+import { AddOnCategoryPanel } from "@/components/AddOnCategoryPanel";
+
+type DetailTab = "addons" | "groups" | "availability" | "recipe";
 
 const emptyForm = {
   id: "",
@@ -40,6 +43,7 @@ export function MenuPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [activeTab, setActiveTab] = useState<DetailTab>("recipe");
 
   useEffect(() => {
     if (!canManage) return;
@@ -119,6 +123,7 @@ export function MenuPage() {
       unit: product.unit,
       active: product.active,
     });
+    setActiveTab("recipe");
   }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -358,31 +363,71 @@ export function MenuPage() {
         </div>
       </form>
 
-      {form.id && (
-        <>
-          <section className="flex max-w-2xl flex-col gap-2">
-            <h2 className="text-base font-semibold">
-              {t.addonCategoriesOfferedTitle}
-            </h2>
-            <div className="flex flex-wrap gap-3">
-              {addonCategories.map((c) => (
-                <label key={c.id} className="flex items-center gap-1.5 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={offeredCategories.has(c.id)}
-                    onChange={() =>
-                      toggleAddonCategory(c.id, offeredCategories.has(c.id))
-                    }
-                  />
-                  {locale === "ar" ? c.name_ar : c.name_en}
-                </label>
-              ))}
-            </div>
-          </section>
+      {form.id ? (
+        <section className="flex max-w-2xl flex-col gap-4">
+          <div className="flex gap-1 border-b border-zinc-200 dark:border-zinc-800">
+            {(
+              [
+                ["recipe", t.recipeTitle],
+                ["addons", t.tabAddons],
+                ["groups", t.tabGroups],
+                ["availability", t.tabAvailability],
+              ] as [DetailTab, string][]
+            ).map(([tab, label]) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium ${
+                  activeTab === tab
+                    ? "border-fluffy-orange text-fluffy-orange"
+                    : "border-transparent text-zinc-500 dark:text-zinc-400"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
-          <section className="flex max-w-2xl flex-col gap-2">
-            <h2 className="text-base font-semibold">{t.productGroupsTitle}</h2>
-            {groups.length === 0 ? (
+          {activeTab === "recipe" && (
+            <RecipeLinesEditor parentProductId={form.id} />
+          )}
+
+          {activeTab === "addons" && (
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-wrap gap-3">
+                {addonCategories.map((c) => (
+                  <label
+                    key={c.id}
+                    className="flex items-center gap-1.5 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={offeredCategories.has(c.id)}
+                      onChange={() =>
+                        toggleAddonCategory(c.id, offeredCategories.has(c.id))
+                      }
+                    />
+                    {locale === "ar" ? c.name_ar : c.name_en}
+                  </label>
+                ))}
+              </div>
+
+              {addonCategories
+                .filter((c) => offeredCategories.has(c.id))
+                .map((c) => (
+                  <div key={c.id} className="flex flex-col gap-1">
+                    <h3 className="text-sm font-semibold">
+                      {locale === "ar" ? c.name_ar : c.name_en}
+                    </h3>
+                    <AddOnCategoryPanel categoryId={c.id} />
+                  </div>
+                ))}
+            </div>
+          )}
+
+          {activeTab === "groups" &&
+            (groups.length === 0 ? (
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
                 {t.noProductGroupsYet}
               </p>
@@ -402,21 +447,16 @@ export function MenuPage() {
                   </label>
                 ))}
               </div>
-            )}
-          </section>
+            ))}
 
-          <section className="flex max-w-2xl flex-col gap-2">
-            <h2 className="text-base font-semibold">
-              {t.branchAvailabilityTitle}
-            </h2>
+          {activeTab === "availability" && (
             <LocationAvailabilityPicker productId={form.id} />
-          </section>
-
-          <section className="flex max-w-2xl flex-col gap-2">
-            <h2 className="text-base font-semibold">{t.recipeTitle}</h2>
-            <RecipeLinesEditor parentProductId={form.id} />
-          </section>
-        </>
+          )}
+        </section>
+      ) : (
+        <p className="max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">
+          {t.menuItemDetailHint}
+        </p>
       )}
     </div>
   );
